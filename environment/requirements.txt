@@ -1,0 +1,49 @@
+﻿# ============================================================
+# Privacy-Preserving Synthetic Healthcare Data Framework
+# Pinned Requirements — Phase 2
+# ============================================================
+# Python version: 3.10.x (required; Opacus 1.x requires >=3.8, <=3.11)
+#
+# DP Library choice: Opacus (PyTorch ecosystem)
+# Rationale:
+#   - Opacus integrates directly with PyTorch autograd; no separate
+#     computation graph required.
+#   - Actively maintained by Meta with DP-SGD, per-sample gradient
+#     clipping, and Renyi accountant built in.
+#   - tensorflow-privacy was considered but rejected: it requires
+#     TF2 which conflicts with the diffusion model architecture
+#     (Phase 7 uses PyTorch-native diffusion). Mixing TF and PyTorch
+#     in the same training loop introduces needless complexity.
+#   - Opacus 1.4 adds support for BatchMemoryManager (critical for
+#     Kaggle VRAM constraint) and virtual steps (gradient accumulation
+#     under DP).
+#
+# All versions are pinned to the minor version. Patch updates are
+# acceptable but must be validated against the setup_check.py smoke test.
+
+# --- Deep Learning & DP ---
+torch==2.3.1
+torchvision==0.18.1          # needed by some Opacus internals
+opacus==1.5.2                # DP-SGD, per-sample gradients, accountant
+
+# --- Data & Numerics ---
+pandas==2.2.2
+numpy==1.26.4
+scikit-learn==1.5.1
+scipy==1.13.1                # statistical tests for missingness heuristics
+
+# --- Config & Validation ---
+pydantic==2.7.4              # typed config schemas (V2 API)
+pydantic-settings==2.3.4     # .env / environment variable integration
+
+# --- Serialization & Registry ---
+joblib==1.4.2                # model/scaler serialization (thread-safe)
+pyarrow==16.1.0              # parquet support for schema registry artifacts
+
+# --- Testing ---
+pytest==8.2.2
+pytest-cov==5.0.0
+pytest-xdist==3.5.0          # parallel test execution
+
+# --- Logging & Utilities ---
+rich==13.7.1                 # structured terminal output for setup_check.py

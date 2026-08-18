@@ -1,0 +1,38 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+*.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Virtual Environment
+.venv310/
+.venv/
+venv/
+env/
+
+# Pytest / Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Data and Models
+data/
+*.zip
+*.csv
+*.pt
+*.pth
+
+# Logs / Artifacts
+logs/
+*.log
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+__MACOSX/
