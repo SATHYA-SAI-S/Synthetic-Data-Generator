@@ -21,6 +21,7 @@ def make_encoder_factory(config: PipelineConfig):
 
 def make_scaler_factory(config: PipelineConfig):
     return lambda col_name: StandardScaler()
+
 from src.diffusion.denoiser import MLPDenoiser
 from src.diffusion.schedule import LinearNoiseSchedule
 from src.diffusion.sampler import generate_samples
@@ -33,7 +34,21 @@ from src.orchestration.gpu_budget_guard import ComputeBudgetGuard
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
-def run_sweep(data_path: str, output_dir: str):
+def run_sweep(
+    data_path: str,
+    output_dir: str,
+    config: PipelineConfig = None,
+    epsilons: list = None,
+) -> None:
+    """
+    Run the end-to-end DP-diffusion pipeline sweep across epsilon budgets.
+
+    Args:
+        data_path: Path to input data (CSV or zip containing diabetic_data.csv).
+        output_dir: Directory to write outputs.
+        config: Optional PipelineConfig override. Defaults to PipelineConfig().
+        epsilons: Optional list of target epsilon values. Defaults to [0.1, 1.0, 10.0].
+    """
     os.makedirs(output_dir, exist_ok=True)
     
     # 1. Initialize GPU Guard
@@ -48,15 +63,19 @@ def run_sweep(data_path: str, output_dir: str):
     else:
         raw_df = pd.read_csv(data_path)
     
-    epsilons = [0.1, 1.0, 10.0]
+    if epsilons is None:
+        epsilons = [0.1, 1.0, 10.0]
+    if config is None:
+        config = PipelineConfig()
+    
+    num_timesteps = config.diffusion.num_timesteps
+    hidden_dims = config.diffusion.hidden_dims
+    num_epochs = config.training.epochs
     results_report = []
     
     for target_eps in epsilons:
         log.info(f"=== Starting Sweep: Epsilon = {target_eps} ===")
         guard.check_budget()
-        
-        # 3. Configure Pipeline
-        config = PipelineConfig()
         
         # 4. Profile & Preprocess
         dataset_name = f"diabetes_eps_{target_eps}"
@@ -88,16 +107,16 @@ def run_sweep(data_path: str, output_dir: str):
         # 6. Initialize Diffusion & DP Components
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         log.info(f"Training device: {device} | GPU: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'None'}")
-        denoiser = MLPDenoiser(input_dim=input_dim, hidden_dims=[256, 256, 256], num_timesteps=1000)
+        denoiser = MLPDenoiser(input_dim=input_dim, hidden_dims=hidden_dims, num_timesteps=num_timesteps)
         
         tier_params = {"global": list(denoiser.parameters())}
         tier_clip_norms = {"global": 1.0} 
         
-        schedule = LinearNoiseSchedule(num_timesteps=1000, device=device)
+        schedule = LinearNoiseSchedule(num_timesteps=num_timesteps, device=device)
         
         # Adjust base_sigma so that high epsilon gets low noise, and low epsilon gets high noise
         base_sigma = 15.0 / target_eps
-        privacy_schedule = AdaptiveNoiseSchedule(base_sigma=base_sigma, num_timesteps=1000, strategy="linear")
+        privacy_schedule = AdaptiveNoiseSchedule(base_sigma=base_sigma, num_timesteps=num_timesteps, strategy="linear")
         accountant = CentralPrivacyAccountant()
         optimizer = torch.optim.Adam(denoiser.parameters(), lr=1e-3)
         
@@ -115,18 +134,18 @@ def run_sweep(data_path: str, output_dir: str):
         
         # 7. Train
         dataset = TensorDataset(torch.tensor(encoded_data, dtype=torch.float32))
-        loader = DataLoader(dataset, batch_size=256, shuffle=True)
+        loader = DataLoader(dataset, batch_size=config.training.batch_size, shuffle=True)
         
         loss = 0.0
         eps_spent = 0.0
-        for epoch in tqdm(range(config.epochs), desc=f"Training eps={target_eps}"):
+        for epoch in tqdm(range(num_epochs), desc=f"Training eps={target_eps}"):
             loss = trainer.train_epoch(loader)
             eps_spent = accountant.get_epsilon(target_delta=1e-5)
             
         # Save model checkpoint
         ckpt_dir = os.path.join(output_dir, "checkpoints")
         ckpt_path = os.path.join(ckpt_dir, f"model_eps_{target_eps}.pt")
-        trainer.save_checkpoint(ckpt_path, epoch=config.epochs, loss=loss, extra={"target_epsilon": target_eps, "eps_spent": eps_spent})
+        trainer.save_checkpoint(ckpt_path, epoch=num_epochs, loss=loss, extra={"target_epsilon": target_eps, "eps_spent": eps_spent})
         
         stats = guard.get_resource_stats()
         log.info(f"Training finished. Final Loss: {loss:.4f}, Epsilon spent: {eps_spent:.4f}")

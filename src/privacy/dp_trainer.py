@@ -51,7 +51,16 @@ class DPTrainer:
         self.privacy_schedule = privacy_schedule
         self.dataset_size = dataset_size
         
-        # Remap tier_params to the wrapped module's parameters.
+        # CRITICAL FIX (K-02): Remap tier_params to the WRAPPED module's parameters.
+        # Previously, tier_params were extracted from the ORIGINAL denoiser before
+        # wrapping with GradSampleModule. Opacus's GradSampleModule COPIES the module
+        # and its parameters, so the original parameter objects never receive
+        # .grad_sample. This caused clip_and_noise_tier to silently no-op, meaning
+        # NO DP noise was ever added and NO privacy accounting was recorded.
+        #
+        # The fix: build a mapping from original parameter IDs to wrapped parameter
+        # objects, then remap all tier_params through it. This ensures the wrapped
+        # parameters (which DO get .grad_sample populated by Opacus) are used.
         wrapped_params = list(self.denoiser.parameters())
         original_params = list(denoiser.parameters())
         param_map = {id(orig): wrapped for orig, wrapped in zip(original_params, wrapped_params)}
@@ -60,6 +69,13 @@ class DPTrainer:
         for tier_name, p_list in tier_params.items():
             remapped = [param_map[id(p)] for p in p_list if id(p) in param_map]
             self.tier_params[tier_name] = remapped
+            if len(remapped) != len(p_list):
+                log.warning(
+                    "DPTrainer: %d of %d parameters in tier '%s' could not be remapped "
+                    "to the wrapped GradSampleModule. DP noise will NOT be applied to "
+                    "unmapped parameters.",
+                    len(p_list) - len(remapped), len(p_list), tier_name,
+                )
             
         self.tier_clip_norms = tier_clip_norms
         self.device = device

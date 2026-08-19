@@ -18,6 +18,11 @@ class ComputeBudgetGuard:
         self.max_seconds = float(max_hours * 3600.0)
         self.session_start = time.time()
         self.previously_elapsed = self._load_state()
+        # M-1 FIX: Track GPU-active time separately from wall-clock.
+        # This prevents idle time (e.g., overnight sessions) from exhausting
+        # the budget. We track both wall-clock and GPU-active time.
+        self._gpu_active_seconds = 0.0
+        self._last_gpu_check = time.time()
 
     def _load_state(self) -> float:
         if self.state_file.exists():

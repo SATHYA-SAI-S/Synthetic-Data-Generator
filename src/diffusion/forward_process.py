@@ -22,6 +22,9 @@ def forward_diffuse(
     if x_0.ndim != 2:
         raise ValueError(f"Expected 2D tensor x_0 (batch_size, input_dim), got shape {x_0.shape}")
         
+    # H-2 FIX: Move schedule tensors to x_0.device to prevent device mismatch.
+    # Previously, if the schedule was constructed on CPU (default) but x_0 was
+    # on CUDA, the multiplication below would crash with a device mismatch error.
     alphas_cumprod = schedule.get_alphas_cumprod().to(x_0.device)
     num_timesteps = schedule.num_timesteps
     
