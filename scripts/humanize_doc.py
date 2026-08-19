@@ -4,19 +4,24 @@ import urllib.request
 import os
 
 def humanize_text(text):
-    prompt = (
-        "You are an expert text humanizer. Please rewrite the following technical explanation "
-        "so that it sounds natural, human-written, and engaging. Remove common AI buzzwords, "
-        "vary the sentence structure, and maintain all technical accuracy.\n\n"
-        "Original Text:\n"
-        f"{text}\n\n"
-        "Humanized Text:"
-    )
-    
-    url = "http://localhost:11434/api/generate"
+    url = "http://localhost:11434/api/chat"
     payload = {
         "model": "phi3",
-        "prompt": prompt,
+        "messages": [
+            {
+                "role": "system",
+                "content": (
+                    "You are an expert text humanizer. Your only job is to rewrite the user's text to sound natural, "
+                    "human-written, and engaging. Remove common AI buzzwords (like 'novel', 'robust', 'delve', 'leverage'), "
+                    "vary the sentence structure, and maintain all technical accuracy. "
+                    "Output ONLY the rewritten text. Do not include introductory phrases, conversational filler, or repeat the text."
+                )
+            },
+            {
+                "role": "user",
+                "content": text
+            }
+        ],
         "stream": False
     }
     
@@ -29,7 +34,7 @@ def humanize_text(text):
     try:
         with urllib.request.urlopen(req) as response:
             result = json.loads(response.read().decode())
-            return result.get("response", "").strip()
+            return result.get("message", {}).get("content", "").strip()
     except urllib.error.URLError:
         print("Warning: Could not connect to Ollama on http://localhost:11434.")
         print("Please ensure Ollama is running and the phi3 model is pulled.")
