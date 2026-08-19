@@ -40,7 +40,12 @@ def run_sweep(data_path: str, output_dir: str):
     
     # 2. Load Raw Data
     log.info(f"Loading data from {data_path}")
-    raw_df = pd.read_csv(data_path, compression="zip" if data_path.endswith(".zip") else "infer")
+    if data_path.endswith('.zip'):
+        with zipfile.ZipFile(data_path, 'r') as z:
+            with z.open('diabetic_data.csv') as f:
+                raw_df = pd.read_csv(f)
+    else:
+        raw_df = pd.read_csv(data_path)
     
     epsilons = [0.1, 1.0, 10.0]
     results_report = []
