@@ -87,6 +87,7 @@ def run_sweep(data_path: str, output_dir: str):
         
         # 6. Initialize Diffusion & DP Components
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        log.info(f"Training device: {device} | GPU: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'None'}")
         denoiser = MLPDenoiser(input_dim=input_dim, hidden_dims=[256, 256, 256], num_timesteps=1000)
         
         tier_params = {"global": list(denoiser.parameters())}
