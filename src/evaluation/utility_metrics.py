@@ -63,15 +63,18 @@ class UtilityEvaluator:
     def evaluate_bivariate_correlation_rmse(self) -> float:
         """
         Computes the RMSE between the Pearson correlation matrices of the real and synthetic numeric data.
+        Ensures columns are common, aligned, and matched in identical order.
         """
         real_num = self.df_real.select_dtypes(include=[np.number])
         synth_num = self.df_synth.select_dtypes(include=[np.number])
         
-        if real_num.shape[1] < 2:
+        # Intersect numeric columns to ensure identical order and alignment
+        common_cols = [c for c in real_num.columns if c in synth_num.columns]
+        if len(common_cols) < 2:
             return 0.0
             
-        corr_real = real_num.corr().fillna(0).values
-        corr_synth = synth_num.corr().fillna(0).values
+        corr_real = real_num[common_cols].corr().fillna(0.0).values
+        corr_synth = synth_num[common_cols].corr().fillna(0.0).values
         
         diff = corr_real - corr_synth
         rmse = np.sqrt(np.mean(diff ** 2))

@@ -6,22 +6,48 @@ def generate_samples(
     denoiser: AbstractDenoiser,
     schedule: AbstractNoiseSchedule,
     num_samples: int,
-    device: torch.device = torch.device('cpu')
+    device: torch.device = torch.device('cpu'),
+    batch_size: int = 8192
 ) -> torch.Tensor:
     """
     Generate synthetic samples by running the reverse diffusion process (T -> 0).
+    Supports chunked sampling to avoid VRAM exhaustion on large sample sizes.
     
     Args:
         denoiser: Trained denoising network.
         schedule: The noise schedule.
         num_samples: Number of synthetic rows to generate.
         device: Torch device to use.
+        batch_size: Maximum batch size per sampling chunk.
         
     Returns:
         Tensor of shape (num_samples, input_dim) representing synthetic rows.
     """
+    if num_samples <= 0:
+        raise ValueError(f"num_samples must be positive, got {num_samples}")
+
     denoiser.eval()
     
+    # If sample count exceeds batch_size, generate in chunks
+    if batch_size is not None and num_samples > batch_size:
+        chunks = []
+        remaining = num_samples
+        while remaining > 0:
+            current_batch = min(remaining, batch_size)
+            chunk = _generate_single_batch(denoiser, schedule, current_batch, device)
+            chunks.append(chunk)
+            remaining -= current_batch
+        return torch.cat(chunks, dim=0)
+    else:
+        return _generate_single_batch(denoiser, schedule, num_samples, device)
+
+
+def _generate_single_batch(
+    denoiser: AbstractDenoiser,
+    schedule: AbstractNoiseSchedule,
+    num_samples: int,
+    device: torch.device
+) -> torch.Tensor:
     # Start from pure Gaussian noise x_T
     x = torch.randn((num_samples, denoiser.input_dim), device=device)
     
@@ -39,14 +65,17 @@ def generate_samples(
         a_cumprod_t = alphas_cumprod[t]
         beta_t = betas[t]
         
-        # DDPM update rule
-        x = (1.0 / torch.sqrt(a_t)) * (
-            x - ((1.0 - a_t) / torch.sqrt(1.0 - a_cumprod_t)) * pred_noise
+        # DDPM update rule with numerical stability clamp
+        denom = torch.sqrt(torch.clamp(1.0 - a_cumprod_t, min=1e-8))
+        sqrt_a_t = torch.sqrt(torch.clamp(a_t, min=1e-8))
+        
+        x = (1.0 / sqrt_a_t) * (
+            x - ((1.0 - a_t) / denom) * pred_noise
         )
         
         # Add posterior noise for all steps except t=0
         if t > 0:
             noise = torch.randn_like(x)
-            x = x + torch.sqrt(beta_t) * noise
+            x = x + torch.sqrt(torch.clamp(beta_t, min=0.0)) * noise
             
     return x

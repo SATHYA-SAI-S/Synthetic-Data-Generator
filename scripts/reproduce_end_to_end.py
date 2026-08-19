@@ -111,16 +111,26 @@ def run_sweep(data_path: str, output_dir: str):
         
         loss = trainer.train_epoch(loader)
         eps_spent = accountant.get_epsilon(target_delta=1e-5)
+        
+        # Save model checkpoint
+        ckpt_dir = os.path.join(output_dir, "checkpoints")
+        ckpt_path = os.path.join(ckpt_dir, f"model_eps_{target_eps}.pt")
+        trainer.save_checkpoint(ckpt_path, epoch=1, loss=loss, extra={"target_epsilon": target_eps, "eps_spent": eps_spent})
+        
+        stats = guard.get_resource_stats()
         log.info(f"Epoch finished. Loss: {loss:.4f}, Epsilon spent: {eps_spent:.4f}")
+        if stats:
+            log.info(f"Resource Usage: CPU RAM: {stats.get('cpu_ram_used_gb', 'N/A')}/{stats.get('cpu_ram_total_gb', 'N/A')} GB | GPU VRAM: {stats.get('gpu_vram_allocated_gb', 'N/A')} GB")
         
         # 8. Generation
         log.info("Generating synthetic samples...")
-        unwrapped_denoiser = trainer.denoiser._module 
+        unwrapped_denoiser = getattr(trainer.denoiser, "_module", trainer.denoiser)
         synthetic_tensor = generate_samples(
             denoiser=unwrapped_denoiser, 
             schedule=schedule, 
             num_samples=len(raw_df), 
-            device=device
+            device=device,
+            batch_size=8192
         )
         
         # 9. Decoding

@@ -13,17 +13,20 @@ class PrivacyEvaluator:
         self.df_synth = df_synth
         
     def _factorize_data(self, df: pd.DataFrame, reference_cols: list) -> np.ndarray:
-        """Naive conversion to numeric space for distance computation."""
+        """Robust conversion to numeric space for distance computation."""
+        if df.empty or not reference_cols:
+            return np.empty((len(df), len(reference_cols)), dtype=float)
+            
         out = pd.DataFrame()
         for col in reference_cols:
             if col in df.columns:
                 if df[col].dtype == 'object' or pd.api.types.is_bool_dtype(df[col]):
                     out[col] = pd.factorize(df[col])[0]
                 else:
-                    out[col] = df[col].fillna(0)
+                    out[col] = pd.to_numeric(df[col], errors='coerce').fillna(0.0)
             else:
-                out[col] = 0
-        return out.values
+                out[col] = 0.0
+        return out.to_numpy(dtype=float)
         
     def evaluate_mia_risk(self) -> Dict[str, Any]:
         """
@@ -32,23 +35,37 @@ class PrivacyEvaluator:
         to their nearest synthetic neighbor will be noticeably smaller than the distance 
         from holdout records to synthetic neighbors.
         """
+        if self.df_train.empty or self.df_holdout.empty or self.df_synth.empty:
+            return {
+                "mean_dist_train_to_synth": 0.0,
+                "mean_dist_holdout_to_synth": 0.0,
+                "mia_risk_score": 0.0
+            }
+
         cols = self.df_train.columns.tolist()
         
         train_num = self._factorize_data(self.df_train, cols)
         holdout_num = self._factorize_data(self.df_holdout, cols)
         synth_num = self._factorize_data(self.df_synth, cols)
         
+        if len(synth_num) == 0 or len(train_num) == 0 or len(holdout_num) == 0:
+            return {
+                "mean_dist_train_to_synth": 0.0,
+                "mean_dist_holdout_to_synth": 0.0,
+                "mia_risk_score": 0.0
+            }
+
         # Fit Nearest Neighbors on Synthetic Data
         nn = NearestNeighbors(n_neighbors=1, algorithm='auto')
         nn.fit(synth_num)
         
         # Distances from Train -> Synth
         dist_train, _ = nn.kneighbors(train_num)
-        mean_dist_train = np.mean(dist_train)
+        mean_dist_train = float(np.mean(dist_train))
         
         # Distances from Holdout -> Synth
         dist_holdout, _ = nn.kneighbors(holdout_num)
-        mean_dist_holdout = np.mean(dist_holdout)
+        mean_dist_holdout = float(np.mean(dist_holdout))
         
         # Risk Score (0 to 1)
         # If train distances are much smaller than holdout distances, risk is high.

@@ -15,7 +15,15 @@ class MLPDenoiser(nn.Module, AbstractDenoiser):
         num_timesteps: int = 1000
     ) -> None:
         super().__init__()
+        if input_dim <= 0:
+            raise ValueError(f"input_dim must be positive, got {input_dim}")
+        if not hidden_dims or len(hidden_dims) == 0:
+            raise ValueError("hidden_dims must be a non-empty list of integers")
+        if num_timesteps <= 0:
+            raise ValueError(f"num_timesteps must be positive, got {num_timesteps}")
+            
         self._input_dim = input_dim
+        self._num_timesteps = num_timesteps
         
         # Time embedding: project t into the hidden space
         self.time_embed = nn.Sequential(
@@ -27,6 +35,8 @@ class MLPDenoiser(nn.Module, AbstractDenoiser):
         layers = []
         in_dim = input_dim
         for h_dim in hidden_dims:
+            if h_dim <= 0:
+                raise ValueError(f"Hidden dimension must be positive, got {h_dim}")
             layers.append(nn.Linear(in_dim, h_dim))
             layers.append(nn.SiLU())
             layers.append(nn.LayerNorm(h_dim))
@@ -41,6 +51,10 @@ class MLPDenoiser(nn.Module, AbstractDenoiser):
     @property
     def input_dim(self) -> int:
         return self._input_dim
+
+    @property
+    def num_timesteps(self) -> int:
+        return self._num_timesteps
         
     def forward(self, x: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
         """
@@ -53,7 +67,12 @@ class MLPDenoiser(nn.Module, AbstractDenoiser):
         Returns:
             epsilon_pred: (batch_size, input_dim)
         """
-        t_emb = self.time_embed(t) # (batch_size, hidden_dims[0])
+        if x.ndim != 2 or x.shape[-1] != self._input_dim:
+            raise ValueError(f"Expected input x of shape (batch_size, {self._input_dim}), got {x.shape}")
+            
+        # Safely clamp timesteps to valid embedding range
+        t_clamped = t.clamp(0, self._num_timesteps - 1).long()
+        t_emb = self.time_embed(t_clamped) # (batch_size, hidden_dims[0])
         
         h = x
         # 3 modules per logical layer: Linear, SiLU, LayerNorm

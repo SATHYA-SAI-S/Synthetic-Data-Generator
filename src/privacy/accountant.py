@@ -13,13 +13,23 @@ class CentralPrivacyAccountant(AbstractPrivacyAccountant):
         """
         Record a noise addition step.
         """
-        self._accountant.history.append((noise_multiplier, sample_rate, 1))
+        if noise_multiplier < 0:
+            raise ValueError(f"noise_multiplier cannot be negative, got {noise_multiplier}")
+        if sample_rate <= 0.0 or sample_rate > 1.0:
+            raise ValueError(f"sample_rate must be in (0.0, 1.0], got {sample_rate}")
+            
+        self._accountant.history.append((float(noise_multiplier), float(sample_rate), 1))
         
     def get_epsilon(self, target_delta: float) -> float:
         """
         Get the current epsilon for the target delta.
         """
-        return self._accountant.get_epsilon(delta=target_delta)
+        if target_delta <= 0.0 or target_delta >= 1.0:
+            raise ValueError(f"target_delta must be in (0.0, 1.0), got {target_delta}")
+        if not self._accountant.history:
+            return 0.0
+            
+        return float(self._accountant.get_epsilon(delta=target_delta))
         
     @property
     def steps(self) -> int:

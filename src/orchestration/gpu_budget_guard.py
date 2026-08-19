@@ -12,25 +12,30 @@ class ComputeBudgetGuard:
     survives kernel restarts and multiple runs.
     """
     def __init__(self, state_file: str = "compute_budget_state.json", max_hours: float = 30.0) -> None:
+        if max_hours <= 0.0:
+            raise ValueError(f"max_hours must be positive, got {max_hours}")
         self.state_file = Path(state_file)
-        self.max_seconds = max_hours * 3600.0
+        self.max_seconds = float(max_hours * 3600.0)
         self.session_start = time.time()
         self.previously_elapsed = self._load_state()
 
     def _load_state(self) -> float:
         if self.state_file.exists():
             try:
-                with open(self.state_file, 'r') as f:
+                with open(self.state_file, 'r', encoding='utf-8') as f:
                     state = json.load(f)
-                return state.get("elapsed_seconds", 0.0)
+                return float(state.get("elapsed_seconds", 0.0))
             except Exception as e:
                 log.warning(f"Failed to load compute budget state: {e}")
         return 0.0
 
     def _save_state(self, total_elapsed: float) -> None:
         try:
-            with open(self.state_file, 'w') as f:
-                json.dump({"elapsed_seconds": total_elapsed}, f)
+            self.state_file.parent.mkdir(parents=True, exist_ok=True)
+            tmp_path = self.state_file.with_suffix(".tmp")
+            with open(tmp_path, 'w', encoding='utf-8') as f:
+                json.dump({"elapsed_seconds": float(total_elapsed)}, f)
+            tmp_path.replace(self.state_file)
         except Exception as e:
             log.error(f"Failed to save GPU budget state: {e}")
 
@@ -53,3 +58,34 @@ class ComputeBudgetGuard:
             
         remaining = self.max_seconds - total
         # Only log periodically or explicitly in the trainer loop to avoid spam
+
+    @staticmethod
+    def get_resource_stats() -> dict:
+        """
+        Returns a dictionary of current CPU RAM and GPU VRAM statistics.
+        Useful for monitoring resources in notebooks (e.g. Kaggle / Colab).
+        """
+        stats = {}
+        try:
+            import psutil
+            mem = psutil.virtual_memory()
+            stats["cpu_ram_used_gb"] = round((mem.total - mem.available) / (1024 ** 3), 2)
+            stats["cpu_ram_total_gb"] = round(mem.total / (1024 ** 3), 2)
+            stats["cpu_ram_percent"] = mem.percent
+        except ImportError:
+            pass
+
+        try:
+            import torch
+            if torch.cuda.is_available():
+                allocated = torch.cuda.memory_allocated() / (1024 ** 3)
+                reserved = torch.cuda.memory_reserved() / (1024 ** 3)
+                max_alloc = torch.cuda.max_memory_allocated() / (1024 ** 3)
+                stats["gpu_vram_allocated_gb"] = round(allocated, 3)
+                stats["gpu_vram_reserved_gb"] = round(reserved, 3)
+                stats["gpu_vram_max_allocated_gb"] = round(max_alloc, 3)
+                stats["gpu_name"] = torch.cuda.get_device_name(0)
+        except Exception:
+            pass
+
+        return stats

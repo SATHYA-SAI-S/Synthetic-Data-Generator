@@ -1,0 +1,260 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1450 1000" width="1450" height="1000" style="background-color: #FFFFFF; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <filter id="card-shadow" x="-5%" y="-5%" width="110%" height="112%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.06"/>
+    </filter>
+    <filter id="glow-shadow" x="-8%" y="-8%" width="116%" height="116%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#3b82f6" flood-opacity="0.12"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569"/>
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#16a34a"/>
+    </marker>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="1450" height="1000" fill="#FFFFFF"/>
+
+  <!-- Title Header -->
+  <g transform="translate(50, 45)">
+    <rect x="0" y="0" width="1350" height="60" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
+    <text x="25" y="36" font-size="20" font-weight="700" fill="#0f172a">ADVT System Architecture &amp; Container Model</text>
+    <text x="520" y="36" font-size="14" font-weight="500" fill="#64748b">C4-Level Container Architecture | Differential Privacy Healthcare Synthetic Data Framework</text>
+  </g>
+
+  <!-- External Actor / CLI -->
+  <g transform="translate(50, 130)">
+    <rect x="0" y="0" width="300" height="110" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="2" filter="url(#card-shadow)"/>
+    <rect x="15" y="15" width="40" height="40" rx="20" fill="#dcfce7"/>
+    <text x="35" y="39" font-size="18" text-anchor="middle" fill="#16a34a">👤</text>
+    <text x="65" y="32" font-size="15" font-weight="700" fill="#166534">Data Scientist / Clinician</text>
+    <text x="65" y="49" font-size="12" fill="#475569">Defines DP Budget (ε, δ) &amp; Configs</text>
+    <path d="M 15 68 L 285 68" stroke="#bbf7d0" stroke-width="1"/>
+    <text x="15" y="88" font-size="11" font-weight="600" fill="#15803d">ENTRYPOINT: <tspan font-family="monospace" font-size="11" fill="#0f172a">scripts/reproduce_end_to_end.py</tspan></text>
+  </g>
+
+  <!-- Persistent Storage Layer (Left Column) -->
+  <g transform="translate(50, 270)">
+    <rect x="0" y="0" width="300" height="680" rx="12" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+    <rect x="15" y="15" width="270" height="32" rx="6" fill="#e2e8f0"/>
+    <text x="150" y="36" font-size="13" font-weight="700" text-anchor="middle" fill="#334155">PERSISTENT STORAGE LAYER</text>
+
+    <!-- Raw Data Store -->
+    <g transform="translate(15, 65)">
+      <rect x="0" y="0" width="270" height="120" rx="8" fill="#FFFFFF" stroke="#e2e8f0" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <text x="15" y="28" font-size="14" font-weight="700" fill="#0f172a">🗄️ Raw Clinical Data Store</text>
+      <text x="15" y="48" font-size="12" fill="#64748b">Location: <tspan font-family="monospace" fill="#0f172a">data/*.zip, data/*.csv</tspan></text>
+      <text x="15" y="68" font-size="11" fill="#475569">• Mixed clinical features (100k+ rows)</text>
+      <text x="15" y="86" font-size="11" fill="#475569">• High-cardinality &amp; missingness</text>
+      <text x="15" y="104" font-size="11" fill="#dc2626">• Contains raw PHI / HIPAA tokens</text>
+    </g>
+
+    <!-- Schema Registry Store -->
+    <g transform="translate(15, 205)">
+      <rect x="0" y="0" width="270" height="135" rx="8" fill="#FFFFFF" stroke="#e2e8f0" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <text x="15" y="28" font-size="14" font-weight="700" fill="#0f172a">📦 File Schema Registry</text>
+      <text x="15" y="48" font-size="12" fill="#64748b">Location: <tspan font-family="monospace" fill="#0f172a">registry/v{N}/</tspan></text>
+      <text x="15" y="68" font-size="11" fill="#475569">• <tspan font-family="monospace" fill="#2563eb">profile.json</tspan> (Pydantic metadata)</text>
+      <text x="15" y="86" font-size="11" fill="#475569">• <tspan font-family="monospace" fill="#2563eb">pipeline_state.joblib</tspan> (Scalers)</text>
+      <text x="15" y="104" font-size="11" fill="#475569">• <tspan font-family="monospace" fill="#2563eb">latest.txt</tspan> (Atomic version pointer)</text>
+      <text x="15" y="122" font-size="11" fill="#16a34a">✓ SHA-256 Checksum Verified</text>
+    </g>
+
+    <!-- GPU State Store -->
+    <g transform="translate(15, 360)">
+      <rect x="0" y="0" width="270" height="110" rx="8" fill="#FFFFFF" stroke="#e2e8f0" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <text x="15" y="28" font-size="14" font-weight="700" fill="#0f172a">⏱️ Compute Budget Store</text>
+      <text x="15" y="48" font-size="12" fill="#64748b">Location: <tspan font-family="monospace" fill="#0f172a">gpu_state.json</tspan></text>
+      <text x="15" y="68" font-size="11" fill="#475569">• Wall-clock session tracking</text>
+      <text x="15" y="86" font-size="11" fill="#475569">• Weekly hard cap (e.g. 30.0h)</text>
+      <text x="15" y="102" font-size="11" fill="#16a34a">✓ Atomic .tmp -> replace save</text>
+    </g>
+
+    <!-- Synthetic Output & Reports -->
+    <g transform="translate(15, 490)">
+      <rect x="0" y="0" width="270" height="145" rx="8" fill="#FFFFFF" stroke="#e2e8f0" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <text x="15" y="28" font-size="14" font-weight="700" fill="#0f172a">📊 Synthetic Data &amp; Reports</text>
+      <text x="15" y="48" font-size="12" fill="#64748b">Location: <tspan font-family="monospace" fill="#0f172a">outputs/sweep_results/</tspan></text>
+      <text x="15" y="68" font-size="11" fill="#475569">• <tspan font-family="monospace" fill="#16a34a">synthetic_eps_*.csv</tspan></text>
+      <text x="15" y="86" font-size="11" fill="#475569">• <tspan font-family="monospace" fill="#16a34a">sweep_report.json</tspan></text>
+      <text x="15" y="104" font-size="11" fill="#475569">• Empirical Privacy (D-MIA)</text>
+      <text x="15" y="122" font-size="11" fill="#475569">• Statistical Fidelity (KS/TVD)</text>
+    </g>
+  </g>
+
+  <!-- Core Subsystems Area (Right/Center) -->
+
+  <!-- Container 1: Ingestion, Profiling & Config -->
+  <g transform="translate(390, 130)">
+    <rect x="0" y="0" width="480" height="340" rx="12" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+    <rect x="15" y="12" width="450" height="30" rx="6" fill="#e0f2fe"/>
+    <text x="240" y="32" font-size="13" font-weight="700" text-anchor="middle" fill="#0369a1">CONTAINER 1: CONFIGURATION &amp; DATA PROFILING (src/profiling/, src/config/)</text>
+
+    <!-- Config Engine Card -->
+    <g transform="translate(15, 55)">
+      <rect x="0" y="0" width="450" height="100" rx="8" fill="#FFFFFF" stroke="#bae6fd" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <text x="15" y="25" font-size="14" font-weight="700" fill="#0369a1">⚙️ PipelineConfig Engine (Pydantic V2)</text>
+      <text x="15" y="45" font-size="11" fill="#475569">• CardinalityConfig (low_card_max=15, rare_min_freq=10)</text>
+      <text x="15" y="63" font-size="11" fill="#475569">• MissingnessConfig (drop_threshold=0.80, indicator_inj=0.01)</text>
+      <text x="15" y="81" font-size="11" fill="#475569">• SmallNConfig (min_n=100) &amp; PrivacyConfig (target_eps, delta)</text>
+    </g>
+
+    <!-- Dataset Profiler Card -->
+    <g transform="translate(15, 170)">
+      <rect x="0" y="0" width="450" height="150" rx="8" fill="#FFFFFF" stroke="#bae6fd" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <text x="15" y="25" font-size="14" font-weight="700" fill="#0369a1">🔍 DatasetProfiler &amp; HIPAA Scanner</text>
+      <text x="15" y="45" font-size="11" fill="#475569">• 18 HIPAA Safe Harbor Regex Categories (case-insensitive token check)</text>
+      <text x="15" y="63" font-size="11" fill="#475569">• Vectorized Dtype Inference (Continuous, Ordinal, Categorical, Binary)</text>
+      <text x="15" y="81" font-size="11" fill="#475569">• Structural Missingness Correlation (Point-Biserial &amp; Cramér's V)</text>
+      <text x="15" y="99" font-size="11" fill="#475569">• High-Missingness &amp; Near-Identifier Exclusion Flagging</text>
+      <rect x="15" y="115" width="420" height="24" rx="4" fill="#f0f9ff"/>
+      <text x="225" y="131" font-size="11" font-weight="600" text-anchor="middle" fill="#0284c7">Emits: Immutable DatasetProfile (JSON-serializable)</text>
+    </g>
+  </g>
+
+  <!-- Container 2: Preprocessing & Invertible Transformations -->
+  <g transform="translate(900, 130)">
+    <rect x="0" y="0" width="500" height="340" rx="12" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+    <rect x="15" y="12" width="470" height="30" rx="6" fill="#fef3c7"/>
+    <text x="250" y="32" font-size="13" font-weight="700" text-anchor="middle" fill="#b45309">CONTAINER 2: PREPROCESSING &amp; TRANSFORMATION (src/preprocessing/)</text>
+
+    <!-- Missingness Handler Card -->
+    <g transform="translate(15, 55)">
+      <rect x="0" y="0" width="470" height="100" rx="8" fill="#FFFFFF" stroke="#fde68a" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <text x="15" y="25" font-size="14" font-weight="700" fill="#b45309">🩹 MissingnessHandler (Flag Injection)</text>
+      <text x="15" y="45" font-size="11" fill="#475569">• Injects binary indicators: <tspan font-family="monospace">&lt;col&gt;__missing_flag</tspan> (1/0)</text>
+      <text x="15" y="63" font-size="11" fill="#475569">• Imputes median (numeric) / mode (categorical) as placeholders</text>
+      <text x="15" y="81" font-size="11" fill="#475569">• Invertible: Exact NaN restoration on synthesis via mask thresholding</text>
+    </g>
+
+    <!-- Invertible Encoders & Scalers Card -->
+    <g transform="translate(15, 170)">
+      <rect x="0" y="0" width="470" height="150" rx="8" fill="#FFFFFF" stroke="#fde68a" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <text x="15" y="25" font-size="14" font-weight="700" fill="#b45309">🔄 Invertible Encoders &amp; Scalers</text>
+      <text x="15" y="45" font-size="11" fill="#475569">• <tspan font-weight="600">OneHotEncoder</tspan>: Low-cardinality OHE with <tspan font-family="monospace">__null__</tspan> / <tspan font-family="monospace">__other__</tspan> bins</text>
+      <text x="15" y="63" font-size="11" fill="#475569">• <tspan font-weight="600">FrequencyEncoder</tspan>: High-cardinality freq-ordered token indices</text>
+      <text x="15" y="81" font-size="11" fill="#475569">• <tspan font-weight="600">StandardScaler / RobustScaler</tspan>: Z-score &amp; IQR normalization</text>
+      <rect x="15" y="105" width="440" height="32" rx="4" fill="#fffbeb"/>
+      <text x="235" y="125" font-size="11" font-weight="600" text-anchor="middle" fill="#d97706">Forward: fit_transform() -> Tensor(N, D) | Reverse: inverse_transform()</text>
+    </g>
+  </g>
+
+  <!-- Container 3: Privacy & DP-SGD Diffusion Engine (The Protected Enclave) -->
+  <g transform="translate(390, 500)">
+    <rect x="0" y="0" width="1010" height="450" rx="14" fill="#fef2f2" stroke="#f87171" stroke-width="2" stroke-dasharray="6 4" filter="url(#glow-shadow)"/>
+    <rect x="20" y="15" width="970" height="34" rx="6" fill="#fee2e2"/>
+    <text x="505" y="38" font-size="14" font-weight="800" text-anchor="middle" fill="#b91c1c">CONTAINER 3: PROTECTED PRIVACY &amp; DP-DIFFUSION ENCLAVE (src/privacy/, src/diffusion/)</text>
+
+    <!-- Sub-Box 1: Risk Tier Assigner -->
+    <g transform="translate(25, 65)">
+      <rect x="0" y="0" width="290" height="210" rx="8" fill="#FFFFFF" stroke="#fca5a5" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <text x="15" y="28" font-size="14" font-weight="700" fill="#b91c1c">🎯 Heuristic Risk Tier Assigner</text>
+      <text x="15" y="48" font-size="11" fill="#475569">• Uniqueness &amp; HIPAA Heuristics:</text>
+      <text x="25" y="66" font-size="11" fill="#dc2626">  - Tier 1: Strict (HIPAA / unique &gt; 0.8)</text>
+      <text x="25" y="84" font-size="11" fill="#d97706">  - Tier 2: Moderate (unique &gt; 0.15)</text>
+      <text x="25" y="102" font-size="11" fill="#16a34a">  - Tier 3: Loose (low cardinality)</text>
+      <path d="M 15 115 L 275 115" stroke="#fee2e2" stroke-width="1"/>
+      <text x="15" y="135" font-size="12" font-weight="700" fill="#b91c1c">🛡️ Correlation Leakage Guard</text>
+      <text x="15" y="153" font-size="11" fill="#475569">• Pairwise factorized correlation matrix</text>
+      <text x="15" y="171" font-size="11" fill="#475569">• If corr(col1, col2) &gt; 0.70 threshold:</text>
+      <text x="15" y="191" font-size="11" font-weight="600" fill="#b91c1c">  => Promotes both to stricter tier!</text>
+    </g>
+
+    <!-- Sub-Box 2: Diffusion Architecture -->
+    <g transform="translate(330, 65)">
+      <rect x="0" y="0" width="310" height="210" rx="8" fill="#FFFFFF" stroke="#fca5a5" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <text x="15" y="28" font-size="14" font-weight="700" fill="#b91c1c">🌪️ Diffusion Denoiser &amp; Schedule</text>
+      <text x="15" y="48" font-size="11" fill="#475569">• <tspan font-weight="600">MLPDenoiser</tspan>: Time-conditioned MLP</text>
+      <text x="25" y="66" font-size="11" fill="#475569">  - Linear -> SiLU -> LayerNorm layers</text>
+      <text x="25" y="84" font-size="11" fill="#475569">  - Embedding(T) time conditioning</text>
+      <text x="15" y="104" font-size="11" fill="#475569">• <tspan font-weight="600">LinearNoiseSchedule</tspan>: Closed-form forward</text>
+      <text x="25" y="122" font-size="11" font-family="monospace" fill="#0f172a">  q(x_t|x_0) = √(α_bar)*x_0 + √(1-α_bar)*ε</text>
+      <text x="15" y="144" font-size="11" fill="#475569">• <tspan font-weight="600">DDPM Sampler</tspan>: Reverse diffusion</text>
+      <text x="25" y="162" font-size="11" fill="#475569">  - Iterative reverse from pure noise x_T</text>
+      <text x="25" y="180" font-size="11" fill="#475569">  - Numerical underflow &amp; variance guards</text>
+      <text x="25" y="198" font-size="11" font-weight="600" fill="#16a34a">  => Emits synthetic tensor</text>
+    </g>
+
+    <!-- Sub-Box 3: DP-SGD Engine & Accounting -->
+    <g transform="translate(655, 65)">
+      <rect x="0" y="0" width="335" height="210" rx="8" fill="#FFFFFF" stroke="#fca5a5" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <text x="15" y="28" font-size="14" font-weight="700" fill="#b91c1c">🔒 DPTrainer (DP-SGD Engine)</text>
+      <text x="15" y="48" font-size="11" fill="#475569">• <tspan font-weight="600">Opacus GradSampleModule</tspan>: Per-sample grads</text>
+      <text x="15" y="68" font-size="11" fill="#475569">• <tspan font-weight="600">Per-Sample L2 Clip</tspan>: factor = min(1, C / ||g_i||_2)</text>
+      <text x="15" y="88" font-size="11" fill="#475569">• <tspan font-weight="600">Gaussian Noise</tspan>: Noise ~ N(0, σ^2 * C^2 * I)</text>
+      <text x="15" y="108" font-size="11" fill="#475569">• <tspan font-weight="600">Adaptive Noise Schedule</tspan>: σ(t) = base*(0.5 + ratio)</text>
+      <path d="M 15 125 L 320 125" stroke="#fee2e2" stroke-width="1"/>
+      <text x="15" y="145" font-size="12" font-weight="700" fill="#b91c1c">🧮 CentralPrivacyAccountant</text>
+      <text x="15" y="165" font-size="11" fill="#475569">• Rényi Differential Privacy (RDP) Tracker</text>
+      <text x="15" y="183" font-size="11" fill="#475569">• Single source of truth for all noise steps</text>
+      <text x="15" y="201" font-size="11" font-weight="600" fill="#15803d">✓ Guarantees strict (ε, δ)-DP bound</text>
+    </g>
+
+    <!-- Bottom Flow in Protected Enclave: Step Pipeline -->
+    <g transform="translate(25, 290)">
+      <rect x="0" y="0" width="965" height="140" rx="8" fill="#FFFFFF" stroke="#fca5a5" stroke-width="1" filter="url(#card-shadow)"/>
+      <text x="20" y="25" font-size="13" font-weight="700" fill="#0f172a">DP-SGD Mini-Batch Execution Pipeline (Strict Isolation)</text>
+      
+      <!-- Mini Flow Blocks -->
+      <rect x="20" y="40" width="160" height="75" rx="6" fill="#f8fafc" stroke="#cbd5e1"/>
+      <text x="100" y="62" font-size="11" font-weight="700" text-anchor="middle" fill="#0f172a">1. Forward Diffuse</text>
+      <text x="100" y="80" font-size="10" text-anchor="middle" fill="#64748b">Batch x_0 -> x_t</text>
+      <text x="100" y="96" font-size="10" text-anchor="middle" fill="#64748b">Sample t ~ U(0, T)</text>
+
+      <path d="M 180 77 L 205 77" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+      <rect x="210" y="40" width="165" height="75" rx="6" fill="#f8fafc" stroke="#cbd5e1"/>
+      <text x="292" y="62" font-size="11" font-weight="700" text-anchor="middle" fill="#0f172a">2. Per-Sample Grad</text>
+      <text x="292" y="80" font-size="10" text-anchor="middle" fill="#64748b">loss_per_sample.backward()</text>
+      <text x="292" y="96" font-size="10" text-anchor="middle" fill="#64748b">Opacus .grad_sample</text>
+
+      <path d="M 375 77 L 400 77" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+      <rect x="405" y="40" width="170" height="75" rx="6" fill="#fee2e2" stroke="#f87171"/>
+      <text x="490" y="62" font-size="11" font-weight="700" text-anchor="middle" fill="#b91c1c">3. Per-Sample Clip</text>
+      <text x="490" y="80" font-size="10" text-anchor="middle" fill="#b91c1c">Bound norm ||g_i|| ≤ C</text>
+      <text x="490" y="96" font-size="10" text-anchor="middle" fill="#b91c1c">Sensitivity Δ = C</text>
+
+      <path d="M 575 77 L 600 77" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow-red)"/>
+
+      <rect x="605" y="40" width="170" height="75" rx="6" fill="#fee2e2" stroke="#f87171"/>
+      <text x="690" y="62" font-size="11" font-weight="700" text-anchor="middle" fill="#b91c1c">4. Add Noise &amp; Sum</text>
+      <text x="690" y="80" font-size="10" text-anchor="middle" fill="#b91c1c">Noise ~ N(0, σ^2 C^2 I)</text>
+      <text x="690" y="96" font-size="10" text-anchor="middle" fill="#b91c1c">p.grad = (sum+noise)/B</text>
+
+      <path d="M 775 77 L 800 77" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow-red)"/>
+
+      <rect x="805" y="40" width="140" height="75" rx="6" fill="#dcfce7" stroke="#86efac"/>
+      <text x="875" y="62" font-size="11" font-weight="700" text-anchor="middle" fill="#166534">5. Step &amp; Log</text>
+      <text x="875" y="80" font-size="10" text-anchor="middle" fill="#15803d">optimizer.step()</text>
+      <text x="875" y="96" font-size="10" text-anchor="middle" fill="#15803d">accountant.record()</text>
+    </g>
+  </g>
+
+  <!-- Connective Arrows across Containers -->
+  <!-- CLI to Ingestion -->
+  <path d="M 200 240 L 200 330" stroke="#2563eb" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  
+  <!-- Raw Data to Profiler -->
+  <path d="M 320 380 L 390 380" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+  
+  <!-- Profiler to Preprocessing -->
+  <path d="M 870 300 L 900 300" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+  
+  <!-- Preprocessing to Schema Registry -->
+  <path d="M 900 400 L 330 400" stroke="#b45309" stroke-width="2" marker-end="url(#arrow)"/>
+  
+  <!-- Preprocessing to Privacy Enclave -->
+  <path d="M 1150 470 L 1150 500" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+  
+  <!-- Privacy Enclave to Outputs -->
+  <path d="M 390 780 L 320 780" stroke="#16a34a" stroke-width="2.5" marker-end="url(#arrow-green)"/>
+</svg>

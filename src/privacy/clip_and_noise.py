@@ -24,23 +24,32 @@ def clip_and_noise_tier(
     """
     if not params:
         return
+
+    if clip_norm <= 0:
+        raise ValueError(f"clip_norm must be positive, got {clip_norm}")
+    if noise_multiplier < 0:
+        raise ValueError(f"noise_multiplier cannot be negative, got {noise_multiplier}")
+    if batch_size <= 0:
+        raise ValueError(f"batch_size must be positive, got {batch_size}")
+    if dataset_size <= 0:
+        raise ValueError(f"dataset_size must be positive, got {dataset_size}")
         
     # 1. Compute per-sample gradient norm across all params in this tier
     per_param_norms = [
         p.grad_sample.reshape(batch_size, -1).norm(2, dim=-1)
-        for p in params if hasattr(p, "grad_sample")
+        for p in params if hasattr(p, "grad_sample") and p.grad_sample is not None
     ]
     if not per_param_norms:
         return
         
     per_sample_norms = torch.stack(per_param_norms, dim=0).norm(2, dim=0)
     
-    # 2. Compute clipping factor: max(1, C / ||g||)
-    clip_factor = (clip_norm / (per_sample_norms + 1e-6)).clamp(max=1.0)
+    # 2. Compute clipping factor: min(1, C / ||g||)
+    clip_factor = (clip_norm / (per_sample_norms + 1e-6)).clamp(max=1.0).detach()
     
-    # 3. Clip per-sample gradients, sum into .grad, and add noise
+    # 3. Clip per-sample gradients, sum into .grad, and add Gaussian noise
     for p in params:
-        if not hasattr(p, "grad_sample"):
+        if not hasattr(p, "grad_sample") or p.grad_sample is None:
             continue
             
         # Reshape clip_factor to broadcast over grad_sample dimensions
@@ -50,8 +59,11 @@ def clip_and_noise_tier(
         # Sum over batch
         summed_grad = clipped_grad_sample.sum(dim=0)
         
-        # Add noise
-        noise = torch.randn_like(summed_grad) * clip_norm * noise_multiplier
+        # Add DP Gaussian noise: sigma * C
+        if noise_multiplier > 0:
+            noise = torch.randn_like(summed_grad) * (clip_norm * noise_multiplier)
+        else:
+            noise = torch.zeros_like(summed_grad)
         
         # Assign to .grad (averaged over batch)
         p.grad = (summed_grad + noise) / batch_size
@@ -60,5 +72,5 @@ def clip_and_noise_tier(
         p.grad_sample = None
         
     # 4. Record event in the single centralized accountant
-    sample_rate = batch_size / max(1, dataset_size)
+    sample_rate = float(batch_size) / float(max(1, dataset_size))
     accountant.record_step(noise_multiplier=noise_multiplier, sample_rate=sample_rate)

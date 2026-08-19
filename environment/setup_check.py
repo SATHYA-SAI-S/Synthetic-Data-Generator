@@ -141,6 +141,8 @@ def check_opacus_dpsgd_smoke(report: SetupReport) -> None:
         from torch.utils.data import DataLoader, TensorDataset
         from opacus import PrivacyEngine
 
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
         # -- Tiny synthetic data --
         N, D, C = 64, 8, 2  # 64 samples, 8 features, 2 classes
         X = torch.randn(N, D)
@@ -148,8 +150,8 @@ def check_opacus_dpsgd_smoke(report: SetupReport) -> None:
         dataset = TensorDataset(X, y)
         loader = DataLoader(dataset, batch_size=16)
 
-        # -- Tiny model --
-        model = nn.Sequential(nn.Linear(D, 16), nn.ReLU(), nn.Linear(16, C))
+        # -- Tiny model (moved to device BEFORE make_private) --
+        model = nn.Sequential(nn.Linear(D, 16), nn.ReLU(), nn.Linear(16, C)).to(device)
         optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
         criterion = nn.CrossEntropyLoss()
 
@@ -166,6 +168,7 @@ def check_opacus_dpsgd_smoke(report: SetupReport) -> None:
         # -- One training step --
         model.train()
         for batch_X, batch_y in loader:
+            batch_X, batch_y = batch_X.to(device), batch_y.to(device)
             optimizer.zero_grad()
             logits = model(batch_X)
             loss = criterion(logits, batch_y)

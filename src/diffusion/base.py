@@ -16,6 +16,9 @@ class AbstractNoiseSchedule(Protocol):
     def get_alphas_cumprod(self) -> torch.Tensor:
         ...
 
+    def to(self, device: torch.device) -> "AbstractNoiseSchedule":
+        ...
+
 class AbstractDenoiser(Protocol):
     """Protocol for a neural network that predicts noise (epsilon) given x_t and t."""
     def forward(self, x: torch.Tensor, t: torch.Tensor) -> torch.Tensor:

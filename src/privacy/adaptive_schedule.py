@@ -9,8 +9,13 @@ class AdaptiveNoiseSchedule:
     and need more DP noise.
     """
     def __init__(self, base_sigma: float, num_timesteps: int, strategy: str = "linear") -> None:
-        self.base_sigma = base_sigma
-        self.num_timesteps = num_timesteps
+        if base_sigma < 0:
+            raise ValueError(f"base_sigma cannot be negative, got {base_sigma}")
+        if num_timesteps < 1:
+            raise ValueError(f"num_timesteps must be >= 1, got {num_timesteps}")
+            
+        self.base_sigma = float(base_sigma)
+        self.num_timesteps = int(num_timesteps)
         self.strategy = strategy
         self.sigmas = self._compute_schedule()
         
@@ -35,4 +40,5 @@ class AdaptiveNoiseSchedule:
         return sigmas
         
     def get_sigma(self, t: int) -> float:
-        return float(self.sigmas[t])
+        clamped_t = int(max(0, min(int(t), self.num_timesteps - 1)))
+        return float(self.sigmas[clamped_t])
