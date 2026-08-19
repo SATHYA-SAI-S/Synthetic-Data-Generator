@@ -47,3 +47,5 @@ pytest-xdist==3.5.0          # parallel test execution
 
 # --- Logging & Utilities ---
 rich==13.7.1                 # structured terminal output for setup_check.py
+
+python-docx==1.1.0
