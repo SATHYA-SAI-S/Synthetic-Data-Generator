@@ -3,6 +3,7 @@ from pathlib import Path
 import torch
 import pandas as pd
 from torch.utils.data import TensorDataset, DataLoader
+from tqdm import tqdm
 import logging
 import json
 
@@ -109,16 +110,19 @@ def run_sweep(data_path: str, output_dir: str):
         dataset = TensorDataset(torch.tensor(encoded_data, dtype=torch.float32))
         loader = DataLoader(dataset, batch_size=256, shuffle=True)
         
-        loss = trainer.train_epoch(loader)
-        eps_spent = accountant.get_epsilon(target_delta=1e-5)
-        
+        loss = 0.0
+        eps_spent = 0.0
+        for epoch in tqdm(range(config.epochs), desc=f"Training eps={target_eps}"):
+            loss = trainer.train_epoch(loader)
+            eps_spent = accountant.get_epsilon(target_delta=1e-5)
+            
         # Save model checkpoint
         ckpt_dir = os.path.join(output_dir, "checkpoints")
         ckpt_path = os.path.join(ckpt_dir, f"model_eps_{target_eps}.pt")
-        trainer.save_checkpoint(ckpt_path, epoch=1, loss=loss, extra={"target_epsilon": target_eps, "eps_spent": eps_spent})
+        trainer.save_checkpoint(ckpt_path, epoch=config.epochs, loss=loss, extra={"target_epsilon": target_eps, "eps_spent": eps_spent})
         
         stats = guard.get_resource_stats()
-        log.info(f"Epoch finished. Loss: {loss:.4f}, Epsilon spent: {eps_spent:.4f}")
+        log.info(f"Training finished. Final Loss: {loss:.4f}, Epsilon spent: {eps_spent:.4f}")
         if stats:
             log.info(f"Resource Usage: CPU RAM: {stats.get('cpu_ram_used_gb', 'N/A')}/{stats.get('cpu_ram_total_gb', 'N/A')} GB | GPU VRAM: {stats.get('gpu_vram_allocated_gb', 'N/A')} GB")
         

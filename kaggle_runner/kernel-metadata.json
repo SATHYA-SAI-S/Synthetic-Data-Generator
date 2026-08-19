@@ -1,0 +1,15 @@
+{
+  "id": "kingtime248/synthetic-data-dp-sgd-pipeline-2026",
+  "title": "synthetic-data-dp-sgd-pipeline-2026",
+  "code_file": "run_pipeline.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": "true",
+  "enable_gpu": "true",
+  "enable_tpu": "false",
+  "enable_internet": "true",
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "model_sources": []
+}
