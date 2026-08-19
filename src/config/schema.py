@@ -179,7 +179,7 @@ class TrainingConfig(BaseModel):
     model_config = {"frozen": True}
     
     batch_size: int = Field(default=256, ge=1)
-    learning_rate: float = Field(default=1e-3, gt=0.0)
+    learning_rate: float = Field(default=2e-4, gt=0.0)
     epochs: int = Field(default=50, ge=1)
     checkpoint_dir: str = Field(default="checkpoints")
     gpu_budget_hours: float = Field(default=30.0, gt=0.0)

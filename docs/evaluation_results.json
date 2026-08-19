@@ -1,0 +1,11 @@
+{
+    "evaluation_metrics": {
+        "correlation_rmse": 0.21110247135208246,
+        "mia_risk_score": 0.0
+    },
+    "verification": {
+        "hipaa_leaks_detected": 0,
+        "exact_row_memorizations": 0,
+        "status": "PASS"
+    }
+}

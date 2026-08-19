@@ -1,0 +1,17 @@
+[
+    {
+        "target_epsilon": 0.1,
+        "actual_epsilon": 0.10287078632243993,
+        "loss": NaN
+    },
+    {
+        "target_epsilon": 1.0,
+        "actual_epsilon": 0.10322073346214511,
+        "loss": NaN
+    },
+    {
+        "target_epsilon": 10.0,
+        "actual_epsilon": 0.32576109674449094,
+        "loss": NaN
+    }
+]
