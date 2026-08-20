@@ -184,8 +184,8 @@ def _infer_dtype(
     if not is_numeric:
         coerced = pd.to_numeric(non_null, errors="coerce")
         numeric_fraction = coerced.notna().sum() / len(non_null)
-        if numeric_fraction < config.dtype_inference.numeric_confidence_threshold:
-            # Not numeric enough — treat as categorical
+        if numeric_fraction < 1.0:
+            # Not 100% numeric strings — contains alphanumeric codes/symbols -> treat as categorical
             if n_unique <= config.cardinality.low_card_max:
                 return InferredDtype.CATEGORICAL_LOW
             return InferredDtype.CATEGORICAL_HIGH

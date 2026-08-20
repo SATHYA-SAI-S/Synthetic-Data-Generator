@@ -182,13 +182,25 @@ class PreprocessingPipeline:
             )
 
             if inferred in (InferredDtype.CONTINUOUS, InferredDtype.ORDINAL):
-                scaler = self._scaler_factory(col)
-                encoded = scaler.fit_transform(working_df[col]).reshape(-1, 1)
-                self._scalers[col] = scaler
-                self._column_types[col] = "continuous"
-                encoded_parts.append(encoded)
-                self._encoded_col_names.append(col)
-                valid_training_columns.append(col)
+                # Verify column is actually numeric before scaling
+                coerced = pd.to_numeric(working_df[col], errors="coerce")
+                if coerced.isna().sum() > working_df[col].isna().sum():
+                    encoder = self._encoder_factory(col)
+                    encoded = encoder.fit_transform(working_df[col])
+                    self._encoders[col] = encoder
+                    self._column_types[col] = "categorical"
+                    encoded_parts.append(encoded)
+                    valid_training_columns.append(col)
+                    for i in range(encoder.output_dim):
+                        self._encoded_col_names.append(f"{col}__enc{i}")
+                else:
+                    scaler = self._scaler_factory(col)
+                    encoded = scaler.fit_transform(working_df[col]).reshape(-1, 1)
+                    self._scalers[col] = scaler
+                    self._column_types[col] = "continuous"
+                    encoded_parts.append(encoded)
+                    self._encoded_col_names.append(col)
+                    valid_training_columns.append(col)
 
             elif inferred in (
                 InferredDtype.CATEGORICAL_LOW,
@@ -208,22 +220,33 @@ class PreprocessingPipeline:
 
             else:
                 log.warning(
-                    "Column '%s' has dtype '%s'; falling back to scaler.",
+                    "Column '%s' has dtype '%s'; checking numeric viability.",
                     col, inferred.value,
                 )
-                scaler = self._scaler_factory(col)
-                try:
-                    encoded = scaler.fit_transform(working_df[col]).reshape(-1, 1)
-                    self._scalers[col] = scaler
-                    self._column_types[col] = "continuous"
+                coerced = pd.to_numeric(working_df[col], errors="coerce")
+                if coerced.isna().sum() > working_df[col].isna().sum():
+                    encoder = self._encoder_factory(col)
+                    encoded = encoder.fit_transform(working_df[col])
+                    self._encoders[col] = encoder
+                    self._column_types[col] = "categorical"
                     encoded_parts.append(encoded)
-                    self._encoded_col_names.append(col)
                     valid_training_columns.append(col)
-                except Exception as exc:
-                    log.error(
-                        "Cannot encode column '%s' (dtype=%s): %s. Skipping.",
-                        col, inferred.value, exc,
-                    )
+                    for i in range(encoder.output_dim):
+                        self._encoded_col_names.append(f"{col}__enc{i}")
+                else:
+                    scaler = self._scaler_factory(col)
+                    try:
+                        encoded = scaler.fit_transform(working_df[col]).reshape(-1, 1)
+                        self._scalers[col] = scaler
+                        self._column_types[col] = "continuous"
+                        encoded_parts.append(encoded)
+                        self._encoded_col_names.append(col)
+                        valid_training_columns.append(col)
+                    except Exception as exc:
+                        log.error(
+                            "Cannot encode column '%s' (dtype=%s): %s. Skipping.",
+                            col, inferred.value, exc,
+                        )
                     
         # B-01: Update training columns to only those that successfully encoded
         self._training_columns = valid_training_columns

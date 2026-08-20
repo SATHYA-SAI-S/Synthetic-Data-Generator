@@ -130,8 +130,11 @@ class OneHotEncoder(AbstractEncoder):
         if arr.ndim == 1:
             arr = arr.reshape(1, -1)
             
+        if np.isnan(arr).any():
+            arr = np.nan_to_num(arr, nan=0.0)
+
         # R-07: Warn on non-binary (soft) inputs
-        if not np.all(np.isin(arr, [0.0, 1.0]) | np.isnan(arr)):
+        if not np.all(np.isin(arr, [0.0, 1.0])):
             log.warning("OneHotEncoder.inverse_transform: input contains non-binary values (soft predictions).")
 
         indices = np.argmax(arr, axis=1)
@@ -234,10 +237,13 @@ class FrequencyEncoder(AbstractEncoder):
     def inverse_transform(self, arr: np.ndarray) -> np.ndarray:
         """Decode integer indices back to category strings."""
         self._assert_fitted()
-        arr = np.asarray(arr, dtype=int).ravel()  # flatten (n,1) or (n,)
+        arr = np.asarray(arr, dtype=float)
+        if np.isnan(arr).any():
+            arr = np.nan_to_num(arr, nan=0.0)
+        arr = np.round(arr).astype(int).ravel()  # flatten (n,1) or (n,)
         
         # B-08: Warn on out-of-range indices
-        if arr.max() >= len(self._vocab) or arr.min() < 0:
+        if len(arr) > 0 and (arr.max() >= len(self._vocab) or arr.min() < 0):
             log.warning("FrequencyEncoder.inverse_transform: indices out of range [0, %d]. They will be clipped.", len(self._vocab)-1)
             
         result = np.empty(len(arr), dtype=object)
