@@ -227,7 +227,7 @@ class KaggleBridge:
             "kernel_sources": [],
             "model_sources": [],
         }
-        (folder / "kernel-metadata.json").write_text(json.dumps(meta), indent=2)
+        (folder / "kernel-metadata.json").write_text(json.dumps(meta, indent=2), encoding='utf-8')
         shutil.copy2(runner_script_path, folder / Path(runner_script_path).name)
 
         proc = _run(f'kaggle kernels push -p "{folder}"')
