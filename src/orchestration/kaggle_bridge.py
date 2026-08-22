@@ -130,7 +130,7 @@ class KaggleJob:
 def _run(cmd: str, timeout: Optional[int] = None) -> subprocess.CompletedProcess:
     return subprocess.run(
         cmd, shell=True, capture_output=True, text=True, encoding='utf-8', timeout=timeout,
-        env={**os.environ, "PYTHONIOENCODING": "utf-8"},
+        env={**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"},
     )
 
 
@@ -352,3 +352,4 @@ if __name__ == "__main__":  # pragma: no cover - smoke test of classifier
     ]
     for s in samples:
         print(classify_kaggle_error(s))
+
