@@ -12,15 +12,36 @@ class PrivacyEvaluator:
         self.df_holdout = df_holdout
         self.df_synth = df_synth
         
-    def _factorize_data(self, df: pd.DataFrame, reference_cols: list) -> np.ndarray:
-        """Robust conversion to numeric space for distance computation."""
+    def _build_shared_vocab(self, cols: list) -> dict:
+        """E-1 FIX: build ONE category->code vocabulary per categorical column,
+        shared across train/holdout/synth. Previously pd.factorize was called
+        independently per dataframe, so the same category got different codes
+        in each frame and all distances were meaningless."""
+        vocab = {}
+        for col in cols:
+            if col in self.df_train.columns and (
+                self.df_train[col].dtype == 'object'
+                or pd.api.types.is_bool_dtype(self.df_train[col])
+            ):
+                cats = (pd.concat([self.df_train[col], self.df_holdout.get(col),
+                                   self.df_synth.get(col)], ignore_index=True)
+                        .dropna().astype(str).unique())
+                vocab[col] = {c: i for i, c in enumerate(cats)}
+        return vocab
+
+    def _factorize_data(self, df: pd.DataFrame, reference_cols: list,
+                        vocab: dict = None) -> np.ndarray:
+        """Robust conversion to numeric space using the SHARED vocabulary."""
         if df.empty or not reference_cols:
             return np.empty((len(df), len(reference_cols)), dtype=float)
+        vocab = vocab or {}
             
         out = pd.DataFrame()
         for col in reference_cols:
             if col in df.columns:
-                if df[col].dtype == 'object' or pd.api.types.is_bool_dtype(df[col]):
+                if col in vocab:
+                    out[col] = df[col].astype(str).map(vocab[col]).fillna(-1.0)
+                elif df[col].dtype == 'object' or pd.api.types.is_bool_dtype(df[col]):
                     out[col] = pd.factorize(df[col])[0]
                 else:
                     out[col] = pd.to_numeric(df[col], errors='coerce').fillna(0.0)
@@ -44,9 +65,11 @@ class PrivacyEvaluator:
 
         cols = self.df_train.columns.tolist()
         
-        train_num = self._factorize_data(self.df_train, cols)
-        holdout_num = self._factorize_data(self.df_holdout, cols)
-        synth_num = self._factorize_data(self.df_synth, cols)
+        # E-1 FIX: one shared vocabulary across all three frames
+        vocab = self._build_shared_vocab(cols)
+        train_num = self._factorize_data(self.df_train, cols, vocab)
+        holdout_num = self._factorize_data(self.df_holdout, cols, vocab)
+        synth_num = self._factorize_data(self.df_synth, cols, vocab)
         
         if len(synth_num) == 0 or len(train_num) == 0 or len(holdout_num) == 0:
             return {

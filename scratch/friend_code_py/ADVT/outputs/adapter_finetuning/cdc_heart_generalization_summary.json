@@ -1,0 +1,22 @@
+{
+  "dataset_name": "cdc_brfss_heart_2022",
+  "raw_rows": 445132,
+  "fine_tune_rows": 1000,
+  "original_columns_count": 40,
+  "synthesized_columns_count": 39,
+  "dropped_geographic_hipaa_columns": [
+    "State"
+  ],
+  "encoded_tensor_dim": 160,
+  "trainable_adapter_params": 197896,
+  "frozen_backbone_params": 771176,
+  "final_loss": 1.1656,
+  "epsilon_spent": 0.372,
+  "synthetic_shape": [
+    1000,
+    39
+  ],
+  "total_cells": 39000,
+  "null_cells": 20358,
+  "null_rate_pct": 52.2
+}

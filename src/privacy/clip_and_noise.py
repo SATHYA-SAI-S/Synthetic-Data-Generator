@@ -8,7 +8,7 @@ def clip_and_noise_tier(
     noise_multiplier: float,
     batch_size: int,
     dataset_size: int,
-    accountant: AbstractPrivacyAccountant
+    accountant: AbstractPrivacyAccountant = None
 ) -> None:
     """
     Applies per-sample gradient clipping and Gaussian noise for a specific tier.
@@ -71,6 +71,9 @@ def clip_and_noise_tier(
         # Clear grad_sample to conserve memory (must set to None, not del, for Opacus)
         p.grad_sample = None
         
-    # 4. Record event in the single centralized accountant
-    sample_rate = float(batch_size) / float(max(1, dataset_size))
-    accountant.record_step(noise_multiplier=noise_multiplier, sample_rate=sample_rate)
+    # 4. Record event in the single centralized accountant.
+    # P-2 FIX: accounting is now OPTIONAL here. The trainer records ONE step per
+    # batch (not once per tier) to avoid multi-tier double counting.
+    if accountant is not None:
+        sample_rate = float(batch_size) / float(max(1, dataset_size))
+        accountant.record_step(noise_multiplier=noise_multiplier, sample_rate=sample_rate)

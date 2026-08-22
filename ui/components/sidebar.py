@@ -63,6 +63,26 @@ def render_sidebar():
             
         st.markdown("---")
         
+        # Automation Settings (route threshold + Kaggle credentials)
+        with st.expander("Automation Settings"):
+            threshold = st.number_input(
+                "Small-N Route Threshold (rows)",
+                min_value=100, max_value=1_000_000,
+                value=int(st.session_state.get("small_n_threshold", 10_000)),
+                step=500,
+                help="Datasets below this row count are routed to local adapter "
+                     "fine-tuning; larger datasets go to Kaggle GPU training.")
+            st.session_state.small_n_threshold = int(threshold)
+            
+            st.caption("Kaggle Credentials (stored in session only)")
+            ku = st.text_input("Kaggle Username", value=(st.session_state.get("kaggle_credentials") or {}).get("username", ""))
+            kk = st.text_input("Kaggle API Key", type="password", value=(st.session_state.get("kaggle_credentials") or {}).get("key", ""))
+            if ku and kk:
+                st.session_state.kaggle_credentials = {"username": ku, "key": kk}
+                st.success("Kaggle credentials set for this session.")
+        
+        st.markdown("---")
+        
         # Session Metadata & Compliance Box
         st.markdown("### Compliance State")
         st.markdown("""

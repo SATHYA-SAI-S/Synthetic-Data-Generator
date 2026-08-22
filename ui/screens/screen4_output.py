@@ -5,6 +5,7 @@ import streamlit as st
 from ui.components.panel_b_privacy_ledger import render_panel_b
 from ui.components.panel_c_stats import render_panel_c
 from ui.components.panel_d_export import render_panel_d
+from ui.components.panel_e_redteam import render_panel_e
 
 def render_screen4():
     """Render the Master Output Layer (The OP Dashboard) without data grid clutter."""
@@ -45,9 +46,10 @@ def render_screen4():
         st.session_state.active_epsilon_view = active_eps
         
     # Master Audit Tabs (Without the Data Grid)
-    tab_privacy, tab_stats, tab_export = st.tabs([
+    tab_privacy, tab_stats, tab_redteam, tab_export = st.tabs([
         "Privacy Compliance Ledger",
         "Statistical Utility & Drift Suite",
+        "Red-Team Privacy Audit",
         "Secure Artifact Export"
     ])
     
@@ -56,6 +58,9 @@ def render_screen4():
         
     with tab_stats:
         render_panel_c()
+        
+    with tab_redteam:
+        render_panel_e()
         
     with tab_export:
         render_panel_d()

@@ -1,0 +1,17 @@
+[
+    {
+        "target_epsilon": 0.1,
+        "actual_epsilon": 0.1028707697473108,
+        "loss": 1.3877827853683058
+    },
+    {
+        "target_epsilon": 1.0,
+        "actual_epsilon": 0.10322180795433933,
+        "loss": 1.3770957259902428
+    },
+    {
+        "target_epsilon": 10.0,
+        "actual_epsilon": 0.3374932831100735,
+        "loss": 1.1387685397870675
+    }
+]

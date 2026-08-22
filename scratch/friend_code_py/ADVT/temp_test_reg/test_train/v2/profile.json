@@ -1,0 +1,1885 @@
+{
+  "dataset_name": "test_train",
+  "n_rows": 1000,
+  "n_columns": 50,
+  "columns": [
+    {
+      "name": "encounter_id",
+      "inferred_dtype": "continuous",
+      "pandas_dtype": "int64",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 1000,
+      "uniqueness_ratio": 1.0,
+      "mean": 4250949.834,
+      "std": 1958644.4081117827,
+      "min_val": 12522.0,
+      "max_val": 7555146.0,
+      "median": 4254525.0,
+      "skewness": -0.22384021590907557,
+      "top_categories": null,
+      "n_rare_categories": null,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": true,
+        "matched_category": "Any other unique identifying number or code",
+        "matched_pattern": "encounter_id"
+      }
+    },
+    {
+      "name": "patient_nbr",
+      "inferred_dtype": "continuous",
+      "pandas_dtype": "int64",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 940,
+      "uniqueness_ratio": 0.94,
+      "mean": 28138010.238,
+      "std": 37288859.95540194,
+      "min_val": 12447.0,
+      "max_val": 115196778.0,
+      "median": 5189278.5,
+      "skewness": 1.0707358084901968,
+      "top_categories": null,
+      "n_rare_categories": null,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": true,
+        "matched_category": "Any other unique identifying number or code",
+        "matched_pattern": "patient_nbr"
+      }
+    },
+    {
+      "name": "race",
+      "inferred_dtype": "categorical_low",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 6,
+      "uniqueness_ratio": 0.006,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "Caucasian",
+          682
+        ],
+        [
+          "AfricanAmerican",
+          251
+        ],
+        [
+          "?",
+          31
+        ],
+        [
+          "Other",
+          21
+        ],
+        [
+          "Hispanic",
+          8
+        ],
+        [
+          "Asian",
+          7
+        ]
+      ],
+      "n_rare_categories": 2,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "gender",
+      "inferred_dtype": "binary",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 2,
+      "uniqueness_ratio": 0.002,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "Female",
+          524
+        ],
+        [
+          "Male",
+          476
+        ]
+      ],
+      "n_rare_categories": 0,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "age",
+      "inferred_dtype": "categorical_low",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 10,
+      "uniqueness_ratio": 0.01,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "[70-80)",
+          249
+        ],
+        [
+          "[60-70)",
+          225
+        ],
+        [
+          "[50-60)",
+          210
+        ],
+        [
+          "[40-50)",
+          105
+        ],
+        [
+          "[80-90)",
+          86
+        ],
+        [
+          "[30-40)",
+          50
+        ],
+        [
+          "[10-20)",
+          27
+        ],
+        [
+          "[20-30)",
+          26
+        ],
+        [
+          "[0-10)",
+          11
+        ],
+        [
+          "[90-100)",
+          11
+        ]
+      ],
+      "n_rare_categories": 0,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "weight",
+      "inferred_dtype": "binary",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 1,
+      "uniqueness_ratio": 0.001,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "?",
+          1000
+        ]
+      ],
+      "n_rare_categories": 0,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "admission_type_id",
+      "inferred_dtype": "ordinal",
+      "pandas_dtype": "int64",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 4,
+      "uniqueness_ratio": 0.004,
+      "mean": 4.331,
+      "std": 2.1577986688046447,
+      "min_val": 1.0,
+      "max_val": 6.0,
+      "median": 6.0,
+      "skewness": -0.5952146901293642,
+      "top_categories": null,
+      "n_rare_categories": null,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "discharge_disposition_id",
+      "inferred_dtype": "ordinal",
+      "pandas_dtype": "int64",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 10,
+      "uniqueness_ratio": 0.01,
+      "mean": 15.0,
+      "std": 11.397451552952612,
+      "min_val": 1.0,
+      "max_val": 25.0,
+      "median": 25.0,
+      "skewness": -0.2914616348096386,
+      "top_categories": null,
+      "n_rare_categories": null,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "admission_source_id",
+      "inferred_dtype": "ordinal",
+      "pandas_dtype": "int64",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 7,
+      "uniqueness_ratio": 0.007,
+      "mean": 4.933,
+      "std": 3.695696033113271,
+      "min_val": 1.0,
+      "max_val": 20.0,
+      "median": 7.0,
+      "skewness": 1.5273854844217396,
+      "top_categories": null,
+      "n_rare_categories": null,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "time_in_hospital",
+      "inferred_dtype": "ordinal",
+      "pandas_dtype": "int64",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 14,
+      "uniqueness_ratio": 0.014,
+      "mean": 4.631,
+      "std": 3.1544872467312004,
+      "min_val": 1.0,
+      "max_val": 14.0,
+      "median": 4.0,
+      "skewness": 0.9879285915527515,
+      "top_categories": null,
+      "n_rare_categories": null,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "payer_code",
+      "inferred_dtype": "binary",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 1,
+      "uniqueness_ratio": 0.001,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "?",
+          1000
+        ]
+      ],
+      "n_rare_categories": 0,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "medical_specialty",
+      "inferred_dtype": "categorical_high",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 29,
+      "uniqueness_ratio": 0.029,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "?",
+          322
+        ],
+        [
+          "InternalMedicine",
+          184
+        ],
+        [
+          "Cardiology",
+          134
+        ],
+        [
+          "Family/GeneralPractice",
+          104
+        ],
+        [
+          "Surgery-General",
+          40
+        ],
+        [
+          "Orthopedics-Reconstructive",
+          26
+        ],
+        [
+          "Nephrology",
+          23
+        ],
+        [
+          "Psychiatry",
+          22
+        ],
+        [
+          "Surgery-Cardiovascular/Thoracic",
+          20
+        ],
+        [
+          "Pulmonology",
+          17
+        ],
+        [
+          "ObstetricsandGynecology",
+          16
+        ],
+        [
+          "Gastroenterology",
+          15
+        ],
+        [
+          "Pediatrics-Endocrinology",
+          14
+        ],
+        [
+          "Surgery-Neuro",
+          12
+        ],
+        [
+          "Endocrinology",
+          9
+        ],
+        [
+          "Pediatrics-CriticalCare",
+          8
+        ],
+        [
+          "Urology",
+          8
+        ],
+        [
+          "Obsterics&Gynecology-GynecologicOnco",
+          5
+        ],
+        [
+          "Pediatrics",
+          5
+        ],
+        [
+          "Emergency/Trauma",
+          4
+        ]
+      ],
+      "n_rare_categories": 15,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "num_lab_procedures",
+      "inferred_dtype": "continuous",
+      "pandas_dtype": "int64",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 90,
+      "uniqueness_ratio": 0.09,
+      "mean": 49.249,
+      "std": 16.78113838825023,
+      "min_val": 1.0,
+      "max_val": 105.0,
+      "median": 48.0,
+      "skewness": -0.048243158580014635,
+      "top_categories": null,
+      "n_rare_categories": null,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "num_procedures",
+      "inferred_dtype": "ordinal",
+      "pandas_dtype": "int64",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 7,
+      "uniqueness_ratio": 0.007,
+      "mean": 1.66,
+      "std": 1.8176093374825362,
+      "min_val": 0.0,
+      "max_val": 6.0,
+      "median": 1.0,
+      "skewness": 0.9710818768402489,
+      "top_categories": null,
+      "n_rare_categories": null,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "num_medications",
+      "inferred_dtype": "continuous",
+      "pandas_dtype": "int64",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 46,
+      "uniqueness_ratio": 0.046,
+      "mean": 14.635,
+      "std": 7.651949250179808,
+      "min_val": 1.0,
+      "max_val": 61.0,
+      "median": 13.0,
+      "skewness": 1.1380672003234922,
+      "top_categories": null,
+      "n_rare_categories": null,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "number_outpatient",
+      "inferred_dtype": "ordinal",
+      "pandas_dtype": "int64",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 7,
+      "uniqueness_ratio": 0.007,
+      "mean": 0.052,
+      "std": 0.5211214518397487,
+      "min_val": 0.0,
+      "max_val": 9.0,
+      "median": 0.0,
+      "skewness": 13.930554005902573,
+      "top_categories": null,
+      "n_rare_categories": null,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "number_emergency",
+      "inferred_dtype": "ordinal",
+      "pandas_dtype": "int64",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 3,
+      "uniqueness_ratio": 0.003,
+      "mean": 0.016,
+      "std": 0.133273259740136,
+      "min_val": 0.0,
+      "max_val": 2.0,
+      "median": 0.0,
+      "skewness": 8.95913340335656,
+      "top_categories": null,
+      "n_rare_categories": null,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "number_inpatient",
+      "inferred_dtype": "ordinal",
+      "pandas_dtype": "int64",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 7,
+      "uniqueness_ratio": 0.007,
+      "mean": 0.211,
+      "std": 0.6138858654960675,
+      "min_val": 0.0,
+      "max_val": 6.0,
+      "median": 0.0,
+      "skewness": 4.65328999476992,
+      "top_categories": null,
+      "n_rare_categories": null,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "diag_1",
+      "inferred_dtype": "continuous",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 192,
+      "uniqueness_ratio": 0.192,
+      "mean": 487.0542712550607,
+      "std": 210.21567787125832,
+      "min_val": 8.0,
+      "max_val": 999.0,
+      "median": 428.0,
+      "skewness": 0.6849147460685268,
+      "top_categories": null,
+      "n_rare_categories": null,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "diag_2",
+      "inferred_dtype": "continuous",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 169,
+      "uniqueness_ratio": 0.169,
+      "mean": 412.8883178534572,
+      "std": 177.31209325602345,
+      "min_val": 8.0,
+      "max_val": 999.0,
+      "median": 411.0,
+      "skewness": 1.0646853998293975,
+      "top_categories": null,
+      "n_rare_categories": null,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "diag_3",
+      "inferred_dtype": "categorical_high",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 200,
+      "uniqueness_ratio": 0.2,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "250",
+          118
+        ],
+        [
+          "401",
+          91
+        ],
+        [
+          "414",
+          44
+        ],
+        [
+          "428",
+          39
+        ],
+        [
+          "427",
+          37
+        ],
+        [
+          "276",
+          37
+        ],
+        [
+          "?",
+          34
+        ],
+        [
+          "403",
+          29
+        ],
+        [
+          "250.01",
+          27
+        ],
+        [
+          "496",
+          26
+        ],
+        [
+          "250.02",
+          23
+        ],
+        [
+          "599",
+          22
+        ],
+        [
+          "250.6",
+          18
+        ],
+        [
+          "272",
+          16
+        ],
+        [
+          "V45",
+          15
+        ],
+        [
+          "424",
+          11
+        ],
+        [
+          "780",
+          10
+        ],
+        [
+          "278",
+          9
+        ],
+        [
+          "250.03",
+          8
+        ],
+        [
+          "425",
+          8
+        ]
+      ],
+      "n_rare_categories": 183,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "number_diagnoses",
+      "inferred_dtype": "ordinal",
+      "pandas_dtype": "int64",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 9,
+      "uniqueness_ratio": 0.009,
+      "mean": 6.705,
+      "std": 2.169027357983223,
+      "min_val": 1.0,
+      "max_val": 9.0,
+      "median": 7.0,
+      "skewness": -0.5736050722678739,
+      "top_categories": null,
+      "n_rare_categories": null,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "max_glu_serum",
+      "inferred_dtype": "categorical_low",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 44,
+      "n_null": 956,
+      "missing_rate": 0.956,
+      "n_unique": 3,
+      "uniqueness_ratio": 0.06818181818181818,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "Norm",
+          20
+        ],
+        [
+          ">300",
+          13
+        ],
+        [
+          ">200",
+          11
+        ]
+      ],
+      "n_rare_categories": 0,
+      "missingness_pattern": "high",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "A1Cresult",
+      "inferred_dtype": "categorical_low",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 185,
+      "n_null": 815,
+      "missing_rate": 0.815,
+      "n_unique": 3,
+      "uniqueness_ratio": 0.016216216216216217,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          ">8",
+          118
+        ],
+        [
+          "Norm",
+          38
+        ],
+        [
+          ">7",
+          29
+        ]
+      ],
+      "n_rare_categories": 0,
+      "missingness_pattern": "high",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "metformin",
+      "inferred_dtype": "categorical_low",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 4,
+      "uniqueness_ratio": 0.004,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "No",
+          889
+        ],
+        [
+          "Steady",
+          100
+        ],
+        [
+          "Up",
+          9
+        ],
+        [
+          "Down",
+          2
+        ]
+      ],
+      "n_rare_categories": 2,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "repaglinide",
+      "inferred_dtype": "categorical_low",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 4,
+      "uniqueness_ratio": 0.004,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "No",
+          993
+        ],
+        [
+          "Steady",
+          5
+        ],
+        [
+          "Up",
+          1
+        ],
+        [
+          "Down",
+          1
+        ]
+      ],
+      "n_rare_categories": 3,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "nateglinide",
+      "inferred_dtype": "binary",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 1,
+      "uniqueness_ratio": 0.001,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "No",
+          1000
+        ]
+      ],
+      "n_rare_categories": 0,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "chlorpropamide",
+      "inferred_dtype": "binary",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 1,
+      "uniqueness_ratio": 0.001,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "No",
+          1000
+        ]
+      ],
+      "n_rare_categories": 0,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "glimepiride",
+      "inferred_dtype": "categorical_low",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 4,
+      "uniqueness_ratio": 0.004,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "No",
+          964
+        ],
+        [
+          "Steady",
+          32
+        ],
+        [
+          "Down",
+          2
+        ],
+        [
+          "Up",
+          2
+        ]
+      ],
+      "n_rare_categories": 2,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "acetohexamide",
+      "inferred_dtype": "binary",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 1,
+      "uniqueness_ratio": 0.001,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "No",
+          1000
+        ]
+      ],
+      "n_rare_categories": 0,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "glipizide",
+      "inferred_dtype": "categorical_low",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 4,
+      "uniqueness_ratio": 0.004,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "No",
+          854
+        ],
+        [
+          "Steady",
+          125
+        ],
+        [
+          "Up",
+          14
+        ],
+        [
+          "Down",
+          7
+        ]
+      ],
+      "n_rare_categories": 1,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "glyburide",
+      "inferred_dtype": "categorical_low",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 4,
+      "uniqueness_ratio": 0.004,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "No",
+          899
+        ],
+        [
+          "Steady",
+          90
+        ],
+        [
+          "Up",
+          6
+        ],
+        [
+          "Down",
+          5
+        ]
+      ],
+      "n_rare_categories": 2,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "tolbutamide",
+      "inferred_dtype": "binary",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 2,
+      "uniqueness_ratio": 0.002,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "No",
+          998
+        ],
+        [
+          "Steady",
+          2
+        ]
+      ],
+      "n_rare_categories": 1,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "pioglitazone",
+      "inferred_dtype": "categorical_low",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 3,
+      "uniqueness_ratio": 0.003,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "No",
+          997
+        ],
+        [
+          "Steady",
+          2
+        ],
+        [
+          "Up",
+          1
+        ]
+      ],
+      "n_rare_categories": 2,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "rosiglitazone",
+      "inferred_dtype": "categorical_low",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 3,
+      "uniqueness_ratio": 0.003,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "No",
+          960
+        ],
+        [
+          "Steady",
+          38
+        ],
+        [
+          "Up",
+          2
+        ]
+      ],
+      "n_rare_categories": 1,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "acarbose",
+      "inferred_dtype": "binary",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 2,
+      "uniqueness_ratio": 0.002,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "No",
+          994
+        ],
+        [
+          "Steady",
+          6
+        ]
+      ],
+      "n_rare_categories": 1,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "miglitol",
+      "inferred_dtype": "binary",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 1,
+      "uniqueness_ratio": 0.001,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "No",
+          1000
+        ]
+      ],
+      "n_rare_categories": 0,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "troglitazone",
+      "inferred_dtype": "binary",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 2,
+      "uniqueness_ratio": 0.002,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "No",
+          997
+        ],
+        [
+          "Steady",
+          3
+        ]
+      ],
+      "n_rare_categories": 1,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "tolazamide",
+      "inferred_dtype": "binary",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 2,
+      "uniqueness_ratio": 0.002,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "No",
+          999
+        ],
+        [
+          "Steady",
+          1
+        ]
+      ],
+      "n_rare_categories": 1,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "examide",
+      "inferred_dtype": "binary",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 1,
+      "uniqueness_ratio": 0.001,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "No",
+          1000
+        ]
+      ],
+      "n_rare_categories": 0,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "citoglipton",
+      "inferred_dtype": "binary",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 1,
+      "uniqueness_ratio": 0.001,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "No",
+          1000
+        ]
+      ],
+      "n_rare_categories": 0,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "insulin",
+      "inferred_dtype": "categorical_low",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 4,
+      "uniqueness_ratio": 0.004,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "Steady",
+          416
+        ],
+        [
+          "No",
+          361
+        ],
+        [
+          "Down",
+          143
+        ],
+        [
+          "Up",
+          80
+        ]
+      ],
+      "n_rare_categories": 0,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "glyburide-metformin",
+      "inferred_dtype": "binary",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 1,
+      "uniqueness_ratio": 0.001,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "No",
+          1000
+        ]
+      ],
+      "n_rare_categories": 0,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "glipizide-metformin",
+      "inferred_dtype": "binary",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 1,
+      "uniqueness_ratio": 0.001,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "No",
+          1000
+        ]
+      ],
+      "n_rare_categories": 0,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "glimepiride-pioglitazone",
+      "inferred_dtype": "binary",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 1,
+      "uniqueness_ratio": 0.001,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "No",
+          1000
+        ]
+      ],
+      "n_rare_categories": 0,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "metformin-rosiglitazone",
+      "inferred_dtype": "binary",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 1,
+      "uniqueness_ratio": 0.001,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "No",
+          1000
+        ]
+      ],
+      "n_rare_categories": 0,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "metformin-pioglitazone",
+      "inferred_dtype": "binary",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 1,
+      "uniqueness_ratio": 0.001,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "No",
+          1000
+        ]
+      ],
+      "n_rare_categories": 0,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "change",
+      "inferred_dtype": "binary",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 2,
+      "uniqueness_ratio": 0.002,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "No",
+          589
+        ],
+        [
+          "Ch",
+          411
+        ]
+      ],
+      "n_rare_categories": 0,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "diabetesMed",
+      "inferred_dtype": "binary",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 2,
+      "uniqueness_ratio": 0.002,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "Yes",
+          796
+        ],
+        [
+          "No",
+          204
+        ]
+      ],
+      "n_rare_categories": 0,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    },
+    {
+      "name": "readmitted",
+      "inferred_dtype": "categorical_low",
+      "pandas_dtype": "str",
+      "n_total": 1000,
+      "n_non_null": 1000,
+      "n_null": 0,
+      "missing_rate": 0.0,
+      "n_unique": 3,
+      "uniqueness_ratio": 0.003,
+      "mean": null,
+      "std": null,
+      "min_val": null,
+      "max_val": null,
+      "median": null,
+      "skewness": null,
+      "top_categories": [
+        [
+          "NO",
+          488
+        ],
+        [
+          ">30",
+          418
+        ],
+        [
+          "<30",
+          94
+        ]
+      ],
+      "n_rare_categories": 0,
+      "missingness_pattern": "none",
+      "structural_dependency": null,
+      "hipaa_flag": {
+        "is_identifier": false,
+        "matched_category": null,
+        "matched_pattern": null
+      }
+    }
+  ],
+  "hipaa_flagged_columns": [
+    "encounter_id",
+    "patient_nbr"
+  ],
+  "near_identifier_columns": [],
+  "high_missing_columns": [
+    "max_glu_serum",
+    "A1Cresult"
+  ],
+  "small_n_flag": false,
+  "profiler_config_snapshot": {
+    "cardinality": {
+      "low_card_max": 15,
+      "near_identifier_ratio": 0.95,
+      "rare_category_min_freq": 10,
+      "rare_category_min_frac": null
+    },
+    "missingness": {
+      "drop_if_missing_above": 0.8,
+      "inject_indicator_above": 0.01,
+      "structural_correlation_threshold": 0.4,
+      "structural_min_n": 30
+    },
+    "small_n": {
+      "small_n_threshold": 500,
+      "minimum_viable_n": 100
+    },
+    "dtype_inference": {
+      "numeric_confidence_threshold": 0.95,
+      "ordinal_max_unique_int": 20
+    },
+    "random_seed": 42,
+    "diffusion": {
+      "num_timesteps": 1000,
+      "beta_start": 0.0001,
+      "beta_end": 0.02,
+      "hidden_dims": [
+        256,
+        256,
+        256
+      ]
+    },
+    "training": {
+      "batch_size": 256,
+      "learning_rate": 0.001,
+      "epochs": 50,
+      "checkpoint_dir": "checkpoints",
+      "gpu_budget_hours": 30.0
+    },
+    "privacy": {
+      "target_epsilon": 1.0,
+      "target_delta": 0.00001,
+      "max_grad_norm": 1.0
+    }
+  }
+}

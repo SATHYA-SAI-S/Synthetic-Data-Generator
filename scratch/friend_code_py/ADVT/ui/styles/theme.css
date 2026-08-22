@@ -1,0 +1,154 @@
+/* SYNTHGUARD Clinical Theme */
+:root {
+  --system-blue: #1A73E8;
+  --deep-navy: #0D1B2A;
+  --navy-panel: #1B2A4A;
+  --clinical-white: #F8FAFC;
+  --compliance-green: #22C55E;
+  --privacy-amber: #F59E0B;
+  --breach-red: #EF4444;
+  --data-gray: #94A3B8;
+  --border-color: #334155;
+}
+
+/* Base App Styling */
+.stApp {
+  background-color: var(--deep-navy);
+  color: var(--clinical-white);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Card Containers */
+.synth-card {
+  background-color: #132238;
+  border: 1px solid #2A3F60;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+}
+
+.synth-card-highlight {
+  background: linear-gradient(145deg, #162B47, #132238);
+  border: 1px solid #1A73E8;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+/* Status Badges */
+.badge-pass {
+  background-color: rgba(34, 197, 94, 0.15);
+  color: #4ADE80;
+  border: 1px solid #22C55E;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-warn {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #FBBF24;
+  border: 1px solid #F59E0B;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-danger {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #F87171;
+  border: 1px solid #EF4444;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-info {
+  background-color: rgba(26, 115, 232, 0.15);
+  color: #60A5FA;
+  border: 1px solid #1A73E8;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Metric Display Values */
+.kpi-title {
+  color: #94A3B8;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.kpi-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #F8FAFC;
+  line-height: 1.2;
+}
+
+.kpi-sub {
+  font-size: 0.75rem;
+  color: #64748B;
+  margin-top: 4px;
+}
+
+/* Terminal / Log Output */
+.synth-terminal {
+  background-color: #080E18;
+  border: 1px solid #1E293B;
+  border-radius: 8px;
+  padding: 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  color: #94A3B8;
+  max-height: 280px;
+  overflow-y: auto;
+  line-height: 1.5;
+}
+
+.log-info { color: #60A5FA; }
+.log-warn { color: #FBBF24; }
+.log-hipaa { color: #F87171; font-weight: bold; }
+.log-success { color: #4ADE80; font-weight: bold; }
+
+/* Custom Button Styling */
+div.stButton > button:first-child {
+  border-radius: 8px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: all 0.2s ease;
+}
+
+/* Hide default hamburger menu / footer for clean presentation */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}

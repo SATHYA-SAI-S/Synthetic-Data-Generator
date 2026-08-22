@@ -58,14 +58,18 @@ class HeuristicRiskTierAssigner(AbstractRiskTierAssigner):
         rank_map = {"Tier1": 1, "Tier2": 2, "Tier3": 3}
         rank_inv = {1: "Tier1", 2: "Tier2", 3: "Tier3"}
         
-        # Resolve correlations by promoting to the stricter tier
+        # M-3 FIX: resolve correlations against the INITIAL assignment (fixed
+        # point), not in-place. The old in-place loop made the result depend on
+        # column iteration order.
+        initial_tiers = dict(tiers)
+        
         for col1 in df_sample.columns:
             for col2 in df_sample.columns:
-                if col1 != col2 and col1 in tiers and col2 in tiers:
+                if col1 != col2 and col1 in initial_tiers and col2 in initial_tiers:
                     corr_val = float(corr_matrix.loc[col1, col2])
                     if corr_val > self.correlation_threshold:
-                        r1 = rank_map.get(tiers[col1], 2)
-                        r2 = rank_map.get(tiers[col2], 2)
+                        r1 = rank_map.get(initial_tiers[col1], 2)
+                        r2 = rank_map.get(initial_tiers[col2], 2)
                         tighter = rank_inv[min(r1, r2)]
                         
                         if tiers[col1] != tighter or tiers[col2] != tighter:

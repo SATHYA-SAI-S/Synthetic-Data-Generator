@@ -6,6 +6,10 @@ import hashlib
 import streamlit as st
 import pandas as pd
 from ui.data_loaders.load_synthetic_csv import generate_synthetic_from_real
+from src.orchestration.route_decider import RouteDecider, RouteDecision, save_decision
+from ui.components.pipeline_checklist import (
+    init_pipeline_stages, set_stage, render_pipeline_checklist,
+)
 
 def render_screen1():
     """Render Minimalist Dataset Ingestion and Schema Profiling Screen."""
@@ -74,6 +78,30 @@ def render_screen1():
                 st.session_state.missingness_flags_count = int(null_cols)
                 st.session_state.profile_complete = True
                 
+                # --- Automated route decision (based on CLEAN row count) ---
+                set_stage("Upload & Ingestion", "done", f"{uploaded_file.name} ({len(df):,} rows)")
+                set_stage("HIPAA De-Identification", "done",
+                          f"{len(dropped)} direct identifiers stripped")
+                set_stage("Schema Profiling", "done",
+                          f"{len(clean_cols)} clean clinical columns")
+                set_stage("Route Decision", "running")
+                
+                decider = RouteDecider(
+                    small_n_threshold=int(st.session_state.get("small_n_threshold", 10_000))
+                )
+                decision = decider.decide(len(df))  # len(df) == clean row count (no rows dropped)
+                save_decision(decision, session_dir)
+                st.session_state.route_decision = decision.to_dict()
+                set_stage("Route Decision", "done",
+                          f"{decision.route.upper()} route - {decision.reason}")
+                init_pipeline_stages(decision.route)
+                # Re-mark completed stages after re-init for the chosen route
+                set_stage("Upload & Ingestion", "done", f"{uploaded_file.name} ({len(df):,} rows)")
+                set_stage("HIPAA De-Identification", "done",
+                          f"{len(dropped)} direct identifiers stripped")
+                set_stage("Schema Profiling", "done", f"{len(clean_cols)} clean clinical columns")
+                set_stage("Route Decision", "done", f"{decision.route.upper()} route selected")
+                
                 # Pre-generate synthetic sample for the uploaded dataset
                 synth_df = generate_synthetic_from_real(df[clean_cols], epsilon=1.0)
                 synth_path = os.path.join(session_dir, "synthetic_clean.csv")
@@ -83,6 +111,7 @@ def render_screen1():
                 st.toast(f"Successfully profiled {uploaded_file.name}: {len(df):,} records!")
             except Exception as e:
                 st.error(f"Error parsing uploaded CSV: {e}")
+                set_stage("Schema Profiling", "failed", str(e))
                 
     # Display Clean Schema Metrics if Dataset is Available
     if st.session_state.get("profile_complete") and st.session_state.get("dataset_name"):
@@ -157,6 +186,53 @@ def render_screen1():
           </div>
         </div>
         """, unsafe_allow_html=True)
+        
+        # --- Route Decision Card ---
+        rd = st.session_state.get("route_decision")
+        if rd:
+            st.markdown("<br>", unsafe_allow_html=True)
+            route_color = "#38BDF8" if rd["route"] == "kaggle" else "#A78BFA"
+            route_label = ("Kaggle GPU Training (Full DP-SGD)" if rd["route"] == "kaggle"
+                           else "Local Adapter Fine-Tune (Pretrained Backbone)")
+            override_note = (' <span style="color:#FBBF24;font-size:0.75rem;">[user override]</span>'
+                             if rd.get("overridden_by_user") else "")
+            st.markdown(f"""
+            <div class="synth-card-highlight" style="border-left:4px solid {route_color}; padding:16px 24px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                  <div style="font-weight:700;color:{route_color};font-size:0.95rem;">
+                    Automatic Route Decision: {route_label}{override_note}
+                  </div>
+                  <div style="color:#94A3B8;font-size:0.82rem;margin-top:4px;">{rd['reason']}</div>
+                  <div style="color:#64748B;font-size:0.78rem;margin-top:4px;">{rd['recommended_action']}</div>
+                </div>
+              </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            c_o1, c_o2, c_o3 = st.columns([2, 1, 1])
+            with c_o1:
+                st.caption("Override the automatic recommendation if needed:")
+            with c_o2:
+                if st.button("Force Kaggle Route", disabled=(rd["route"] == "kaggle")):
+                    decider = RouteDecider(int(st.session_state.get("small_n_threshold", 10_000)))
+                    d = decider.apply_override(RouteDecision(**rd), "kaggle")
+                    save_decision(d, session_dir)
+                    st.session_state.route_decision = d.to_dict()
+                    init_pipeline_stages("kaggle")
+                    st.rerun()
+            with c_o3:
+                if st.button("Force Adapter Route", disabled=(rd["route"] == "adapter")):
+                    decider = RouteDecider(int(st.session_state.get("small_n_threshold", 10_000)))
+                    d = decider.apply_override(RouteDecision(**rd), "adapter")
+                    save_decision(d, session_dir)
+                    st.session_state.route_decision = d.to_dict()
+                    init_pipeline_stages("adapter")
+                    st.rerun()
+        
+        # --- Live Pipeline Execution Tracker ---
+        st.markdown("<br>", unsafe_allow_html=True)
+        render_pipeline_checklist()
         
         st.markdown("<br>", unsafe_allow_html=True)
         col_n1, col_n2, col_n3 = st.columns([1, 2, 1])

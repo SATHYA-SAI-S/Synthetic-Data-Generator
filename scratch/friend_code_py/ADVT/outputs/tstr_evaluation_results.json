@@ -1,0 +1,15 @@
+{
+  "target_task": "30-Day Hospital Readmission (<30 days)",
+  "classifier": "HistGradientBoostingClassifier(max_iter=150, lr=0.08)",
+  "TRTR_baseline": {
+    "auc_roc": 0.6855,
+    "f1_score": 0.0208,
+    "accuracy": 0.8891
+  },
+  "TSTR_benchmark": {
+    "auc_roc": 0.4962,
+    "f1_score": 0.0,
+    "accuracy": 0.8884
+  },
+  "utility_retention_pct": 72.39
+}

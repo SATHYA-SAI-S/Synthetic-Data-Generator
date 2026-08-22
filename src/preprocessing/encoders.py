@@ -242,13 +242,18 @@ class FrequencyEncoder(AbstractEncoder):
             arr = np.nan_to_num(arr, nan=0.0)
         arr = np.round(arr).astype(int).ravel()  # flatten (n,1) or (n,)
         
-        # B-08: Warn on out-of-range indices
-        if len(arr) > 0 and (arr.max() >= len(self._vocab) or arr.min() < 0):
-            log.warning("FrequencyEncoder.inverse_transform: indices out of range [0, %d]. They will be clipped.", len(self._vocab)-1)
-            
+        # B-08 / M-6 FIX: route out-of-range indices to __other__ (or NaN) instead
+        # of silently clipping. Silent clipping masked model failure by mapping
+        # garbage indices to the most-frequent category.
+        other_idx = self._cat_to_idx.get(_OTHER_TOKEN)
+        
         result = np.empty(len(arr), dtype=object)
         for i, idx in enumerate(arr):
-            idx = int(np.clip(idx, 0, len(self._vocab) - 1))
+            if idx < 0 or idx >= len(self._vocab):
+                log.warning("FrequencyEncoder.inverse_transform: index %d out of range [0, %d]; routing to '%s'.",
+                            idx, len(self._vocab) - 1, _OTHER_TOKEN if other_idx is not None else "NaN")
+                result[i] = (_OTHER_TOKEN if other_idx is not None else np.nan)
+                continue
             label = self._vocab[idx]
             result[i] = np.nan if label == _NULL_TOKEN else label
         return result

@@ -52,19 +52,19 @@ def main():
     
     os.chdir("Synthetic-Data-Generator")
     
-    # 2. Install requirements
-    print("Installing requirements...")
-    run_cmd("pip install -r requirements.txt")
-    
-    # 3. Force reinstall PyTorch with CUDA 11.8 which supports sm_60 (Tesla P100)
-    #    --force-reinstall is CRITICAL: without it, pip sees torch already installed
-    #    and skips the downgrade, leaving an incompatible build.
+    # K-4 FIX: install the CUDA-11.8 torch build FIRST, then requirements.txt.
+    # Previously requirements.txt was installed first and then torch was
+    # force-reinstalled on top — if opacus/numpy were pinned against a different
+    # torch build, the force-reinstall silently broke them at import time.
     print("Installing PyTorch with P100-compatible CUDA 11.8 build...")
     run_cmd(
         "pip install --force-reinstall --no-cache-dir "
         "torch==2.3.1 torchvision==0.18.1 "
         "--index-url https://download.pytorch.org/whl/cu118 -q"
     )
+    
+    print("Installing requirements (against the pinned torch build)...")
+    run_cmd("pip install -r requirements.txt")
     
     # 3b. Verify CUDA works before proceeding
     verify_cuda()
@@ -74,7 +74,8 @@ def main():
     os.makedirs("data", exist_ok=True)
     dataset_url = "https://archive.ics.uci.edu/static/public/296/diabetes+130-us+hospitals+for+years+1999-2008.zip"
     dataset_path = "data/diabetes+130-us+hospitals+for+years+1999-2008.zip"
-    run_cmd(f"wget -q {dataset_url} -O {dataset_path}")
+    # K-6 FIX: retry on transient UCI failures instead of dying on first attempt.
+    run_cmd(f"wget -q --tries=3 --timeout=60 {dataset_url} -O {dataset_path}")
     
     # Verify the download is a valid zip
     if not zipfile.is_zipfile(dataset_path):

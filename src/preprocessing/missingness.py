@@ -98,7 +98,17 @@ class MissingnessHandler(AbstractMissingnessHandler):
                 if pd.api.types.is_numeric_dtype(df[col]):
                     impute_val = float(col_series.median()) if len(col_series) > 0 else 0.0
                 else:
-                    impute_val = str(col_series.mode().iloc[0]) if len(col_series) > 0 else ""
+                    # M-2 FIX (dtype-agnostic): for any non-numeric dtype (object,
+                    # str, etc.), check whether the content is actually numeric
+                    # (e.g. numeric strings from CSV parsing). If so, use the
+                    # NUMERIC median — previously the mode was str()-cast, and
+                    # pd.to_numeric downstream coerced that string back to NaN,
+                    # re-introducing the missingness this handler removes.
+                    coerced = pd.to_numeric(col_series, errors="coerce")
+                    if len(coerced) > 0 and coerced.notna().all():
+                        impute_val = float(coerced.median())
+                    else:
+                        impute_val = str(col_series.mode().iloc[0]) if len(col_series) > 0 else ""
                 self._imputation_values[col] = impute_val
                 log.debug(
                     "MissingnessHandler: column '%s' missing_rate=%.1f%%, "

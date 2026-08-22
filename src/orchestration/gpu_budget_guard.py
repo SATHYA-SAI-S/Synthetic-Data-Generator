@@ -18,11 +18,9 @@ class ComputeBudgetGuard:
         self.max_seconds = float(max_hours * 3600.0)
         self.session_start = time.time()
         self.previously_elapsed = self._load_state()
-        # M-1 FIX: Track GPU-active time separately from wall-clock.
-        # This prevents idle time (e.g., overnight sessions) from exhausting
-        # the budget. We track both wall-clock and GPU-active time.
-        self._gpu_active_seconds = 0.0
-        self._last_gpu_check = time.time()
+        # M-7 FIX: removed the unused _gpu_active_seconds/_last_gpu_check fields.
+        # They were never updated, so the "GPU-active tracking" comment was false —
+        # this guard measures WALL-CLOCK session time only. Document that honestly.
 
     def _load_state(self) -> float:
         if self.state_file.exists():
@@ -50,7 +48,7 @@ class ComputeBudgetGuard:
 
     def check_budget(self) -> None:
         """
-        Check if the budget is exceeded. Saves state on every check.
+        Check if the (wall-clock) budget is exceeded. Saves state on every check.
         Raises TimeoutError if budget is exhausted.
         """
         total = self.get_elapsed_seconds()

@@ -1,0 +1,221 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 880" width="1500" height="880" style="background-color: #FFFFFF; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <filter id="wf-shadow" x="-5%" y="-5%" width="110%" height="112%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.08"/>
+    </filter>
+    <marker id="wf-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#3b82f6"/>
+    </marker>
+    <marker id="loop-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1500" height="880" fill="#FFFFFF"/>
+
+  <!-- Title Header -->
+  <g transform="translate(50, 35)">
+    <rect x="0" y="0" width="1400" height="55" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
+    <text x="25" y="34" font-size="19" font-weight="700" fill="#0f172a">ADVT End-to-End Execution Workflow</text>
+    <text x="430" y="34" font-size="13" font-weight="500" fill="#64748b">Chronological Execution Lifecycle: Ingestion ➔ Profiling ➔ Preprocessing ➔ DP-SGD ➔ Reverse DDPM ➔ Evaluation</text>
+  </g>
+
+  <!-- Step 1: Initialize & Budget Check -->
+  <g transform="translate(50, 120)">
+    <rect x="0" y="0" width="250" height="150" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="2" filter="url(#wf-shadow)"/>
+    <circle cx="30" cy="30" r="16" fill="#3b82f6"/>
+    <text x="30" y="36" font-size="14" font-weight="800" text-anchor="middle" fill="#FFFFFF">1</text>
+    <text x="60" y="35" font-size="14" font-weight="700" fill="#1e3a8a">Session &amp; Budget Init</text>
+    <text x="15" y="65" font-size="12" fill="#334155"><tspan font-weight="600">ComputeBudgetGuard</tspan></text>
+    <text x="15" y="85" font-size="11" fill="#64748b">• Reads <tspan font-family="monospace">gpu_state.json</tspan></text>
+    <text x="15" y="103" font-size="11" fill="#64748b">• Verifies elapsed &lt; 30.0h</text>
+    <text x="15" y="121" font-size="11" fill="#64748b">• Loads <tspan font-family="monospace">PipelineConfig</tspan></text>
+    <rect x="15" y="132" width="220" height="10" rx="2" fill="#bfdbfe"/>
+  </g>
+
+  <!-- Arrow 1 -> 2 -->
+  <path d="M 300 195 L 340 195" stroke="#3b82f6" stroke-width="2.5" marker-end="url(#wf-arrow)"/>
+
+  <!-- Step 2: Dataset Profiling & HIPAA Scan -->
+  <g transform="translate(340, 120)">
+    <rect x="0" y="0" width="260" height="150" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="2" filter="url(#wf-shadow)"/>
+    <circle cx="30" cy="30" r="16" fill="#3b82f6"/>
+    <text x="30" y="36" font-size="14" font-weight="800" text-anchor="middle" fill="#FFFFFF">2</text>
+    <text x="60" y="35" font-size="14" font-weight="700" fill="#1e3a8a">Data Profiling &amp; HIPAA</text>
+    <text x="15" y="65" font-size="12" fill="#334155"><tspan font-weight="600">DatasetProfiler.profile()</tspan></text>
+    <text x="15" y="85" font-size="11" fill="#64748b">• Scans 18 HIPAA regex rules</text>
+    <text x="15" y="103" font-size="11" fill="#64748b">• Infers dtypes (cont, cat, ord)</text>
+    <text x="15" y="121" font-size="11" fill="#64748b">• Detects structural missingness</text>
+    <rect x="15" y="132" width="230" height="10" rx="2" fill="#bfdbfe"/>
+  </g>
+
+  <!-- Arrow 2 -> 3 -->
+  <path d="M 600 195 L 640 195" stroke="#3b82f6" stroke-width="2.5" marker-end="url(#wf-arrow)"/>
+
+  <!-- Step 3: Preprocessing & Missingness -->
+  <g transform="translate(640, 120)">
+    <rect x="0" y="0" width="260" height="150" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="2" filter="url(#wf-shadow)"/>
+    <circle cx="30" cy="30" r="16" fill="#3b82f6"/>
+    <text x="30" y="36" font-size="14" font-weight="800" text-anchor="middle" fill="#FFFFFF">3</text>
+    <text x="60" y="35" font-size="14" font-weight="700" fill="#1e3a8a">Transform &amp; Encode</text>
+    <text x="15" y="65" font-size="12" fill="#334155"><tspan font-weight="600">PreprocessingPipeline</tspan></text>
+    <text x="15" y="85" font-size="11" fill="#64748b">• Drops HIPAA / high-missing</text>
+    <text x="15" y="103" font-size="11" fill="#64748b">• Injects missingness flags</text>
+    <text x="15" y="121" font-size="11" fill="#64748b">• Fits Scalers &amp; Encoders</text>
+    <rect x="15" y="132" width="230" height="10" rx="2" fill="#bfdbfe"/>
+  </g>
+
+  <!-- Arrow 3 -> 4 -->
+  <path d="M 900 195 L 940 195" stroke="#3b82f6" stroke-width="2.5" marker-end="url(#wf-arrow)"/>
+
+  <!-- Step 4: Schema Registry Persistence -->
+  <g transform="translate(940, 120)">
+    <rect x="0" y="0" width="240" height="150" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="2" filter="url(#wf-shadow)"/>
+    <circle cx="30" cy="30" r="16" fill="#3b82f6"/>
+    <text x="30" y="36" font-size="14" font-weight="800" text-anchor="middle" fill="#FFFFFF">4</text>
+    <text x="60" y="35" font-size="14" font-weight="700" fill="#1e3a8a">Schema Persistence</text>
+    <text x="15" y="65" font-size="12" fill="#334155"><tspan font-weight="600">FileSchemaRegistry.save()</tspan></text>
+    <text x="15" y="85" font-size="11" fill="#64748b">• Writes <tspan font-family="monospace">profile.json</tspan></text>
+    <text x="15" y="103" font-size="11" fill="#64748b">• Writes <tspan font-family="monospace">pipeline_state.joblib</tspan></text>
+    <text x="15" y="121" font-size="11" fill="#64748b">• Computes SHA-256 hash</text>
+    <rect x="15" y="132" width="210" height="10" rx="2" fill="#bfdbfe"/>
+  </g>
+
+  <!-- Arrow 4 -> 5 -->
+  <path d="M 1180 195 L 1220 195" stroke="#3b82f6" stroke-width="2.5" marker-end="url(#wf-arrow)"/>
+
+  <!-- Step 5: Risk Tier Assignment -->
+  <g transform="translate(1220, 120)">
+    <rect x="0" y="0" width="230" height="150" rx="10" fill="#fef2f2" stroke="#fca5a5" stroke-width="2" filter="url(#wf-shadow)"/>
+    <circle cx="30" cy="30" r="16" fill="#dc2626"/>
+    <text x="30" y="36" font-size="14" font-weight="800" text-anchor="middle" fill="#FFFFFF">5</text>
+    <text x="60" y="35" font-size="14" font-weight="700" fill="#991b1b">Risk Tiering</text>
+    <text x="15" y="65" font-size="12" fill="#7f1d1d"><tspan font-weight="600">HeuristicRiskTierAssigner</tspan></text>
+    <text x="15" y="85" font-size="11" fill="#64748b">• Uniqueness heuristics</text>
+    <text x="15" y="103" font-size="11" fill="#64748b">• Correlation guard matrix</text>
+    <text x="15" y="121" font-size="11" fill="#dc2626">• Groups correlated fields</text>
+    <rect x="15" y="132" width="200" height="10" rx="2" fill="#fecaca"/>
+  </g>
+
+  <!-- Turn Downward Arrow from Step 5 to Step 6 -->
+  <path d="M 1335 270 L 1335 340 L 1400 340 L 1400 480 L 1380 480" stroke="#dc2626" stroke-width="2.5" marker-end="url(#loop-arrow)"/>
+
+  <!-- Step 6: DP-SGD Diffusion Training Loop (Center Large Box) -->
+  <g transform="translate(250, 330)">
+    <rect x="0" y="0" width="1120" height="300" rx="12" fill="#fff1f2" stroke="#f43f5e" stroke-width="2.5" filter="url(#wf-shadow)"/>
+    <circle cx="35" cy="35" r="18" fill="#e11d48"/>
+    <text x="35" y="42" font-size="16" font-weight="800" text-anchor="middle" fill="#FFFFFF">6</text>
+    <text x="70" y="40" font-size="16" font-weight="800" fill="#881337">STEP 6: DP-SGD DIFFUSION MODEL TRAINING LOOP (DPTrainer)</text>
+    
+    <!-- Iterative Sub-Steps Inside Step 6 -->
+    <!-- Mini Step 6.1 -->
+    <g transform="translate(30, 70)">
+      <rect x="0" y="0" width="230" height="190" rx="8" fill="#FFFFFF" stroke="#fecdd3" stroke-width="1.5"/>
+      <text x="15" y="28" font-size="13" font-weight="700" fill="#9f1239">6.1 Forward Diffusion</text>
+      <text x="15" y="50" font-size="11" fill="#475569">• Draw batch <tspan font-family="monospace">x_0 ~ D_train</tspan></text>
+      <text x="15" y="70" font-size="11" fill="#475569">• Sample <tspan font-family="monospace">t ~ U(0, T-1)</tspan></text>
+      <text x="15" y="90" font-size="11" fill="#475569">• Add Gaussian schedule noise</text>
+      <text x="15" y="110" font-size="11" font-family="monospace" fill="#0f172a">  x_t = √(α)*x_0 + √(1-α)*ε</text>
+      <text x="15" y="130" font-size="11" fill="#475569">• MLPDenoiser predicts ε_pred</text>
+      <rect x="15" y="150" width="200" height="24" rx="4" fill="#ffe4e6"/>
+      <text x="115" y="166" font-size="10" font-weight="600" text-anchor="middle" fill="#be123c">MSELoss(ε_pred, ε)</text>
+    </g>
+
+    <!-- Arrow 6.1 -> 6.2 -->
+    <path d="M 260 165 L 290 165" stroke="#f43f5e" stroke-width="2" marker-end="url(#loop-arrow)"/>
+
+    <!-- Mini Step 6.2 -->
+    <g transform="translate(290, 70)">
+      <rect x="0" y="0" width="240" height="190" rx="8" fill="#FFFFFF" stroke="#fecdd3" stroke-width="1.5"/>
+      <text x="15" y="28" font-size="13" font-weight="700" fill="#9f1239">6.2 Per-Sample Backprop</text>
+      <text x="15" y="50" font-size="11" fill="#475569">• Wrapped in <tspan font-weight="600">GradSampleModule</tspan></text>
+      <text x="15" y="70" font-size="11" fill="#475569">• Executes backward pass</text>
+      <text x="15" y="90" font-size="11" fill="#475569">• Opacus hooks populate:</text>
+      <text x="15" y="110" font-size="11" font-family="monospace" fill="#be123c">  p.grad_sample (B, ...)</text>
+      <text x="15" y="130" font-size="11" fill="#475569">• Avoids global sum leakage</text>
+      <rect x="15" y="150" width="210" height="24" rx="4" fill="#ffe4e6"/>
+      <text x="120" y="166" font-size="10" font-weight="600" text-anchor="middle" fill="#be123c">Individual Gradient Capture</text>
+    </g>
+
+    <!-- Arrow 6.2 -> 6.3 -->
+    <path d="M 530 165 L 560 165" stroke="#f43f5e" stroke-width="2" marker-end="url(#loop-arrow)"/>
+
+    <!-- Mini Step 6.3 -->
+    <g transform="translate(560, 70)">
+      <rect x="0" y="0" width="250" height="190" rx="8" fill="#FFFFFF" stroke="#fecdd3" stroke-width="1.5"/>
+      <text x="15" y="28" font-size="13" font-weight="700" fill="#9f1239">6.3 Clip &amp; Add Noise</text>
+      <text x="15" y="50" font-size="11" fill="#475569">• Per-sample norm: <tspan font-family="monospace">||g_i||_2</tspan></text>
+      <text x="15" y="70" font-size="11" fill="#475569">• Clip: <tspan font-family="monospace">min(1, C / ||g_i||_2)</tspan></text>
+      <text x="15" y="90" font-size="11" fill="#475569">• Sum clipped grads over batch</text>
+      <text x="15" y="110" font-size="11" fill="#475569">• Add Noise: <tspan font-family="monospace">N(0, σ^2 C^2 I)</tspan></text>
+      <text x="15" y="130" font-size="11" fill="#475569">• Average by batch size: <tspan font-family="monospace">/ B</tspan></text>
+      <rect x="15" y="150" width="220" height="24" rx="4" fill="#ffe4e6"/>
+      <text x="125" y="166" font-size="10" font-weight="600" text-anchor="middle" fill="#be123c">Guaranteed DP Perturbation</text>
+    </g>
+
+    <!-- Arrow 6.3 -> 6.4 -->
+    <path d="M 810 165 L 840 165" stroke="#f43f5e" stroke-width="2" marker-end="url(#loop-arrow)"/>
+
+    <!-- Mini Step 6.4 -->
+    <g transform="translate(840, 70)">
+      <rect x="0" y="0" width="250" height="190" rx="8" fill="#FFFFFF" stroke="#fecdd3" stroke-width="1.5"/>
+      <text x="15" y="28" font-size="13" font-weight="700" fill="#9f1239">6.4 Step &amp; Privacy Accounting</text>
+      <text x="15" y="50" font-size="11" fill="#475569">• <tspan font-weight="600">optimizer.step()</tspan> updates</text>
+      <text x="15" y="70" font-size="11" fill="#475569">• <tspan font-weight="600">accountant.record_step()</tspan></text>
+      <text x="25" y="88" font-size="11" fill="#475569">  - noise_multiplier = σ(t)</text>
+      <text x="25" y="106" font-size="11" fill="#475569">  - sample_rate = B / N</text>
+      <text x="15" y="128" font-size="11" fill="#475569">• ComputeBudgetGuard check</text>
+      <rect x="15" y="150" width="220" height="24" rx="4" fill="#dcfce7"/>
+      <text x="125" y="166" font-size="10" font-weight="600" text-anchor="middle" fill="#166534">Epoch Iteration Complete</text>
+    </g>
+  </g>
+
+  <!-- Left Arrow from Step 6 Down to Step 7 -->
+  <path d="M 250 480 L 180 480 L 180 670 L 180 700" stroke="#16a34a" stroke-width="2.5" marker-end="url(#wf-arrow)"/>
+
+  <!-- Step 7: Reverse DDPM Sampling -->
+  <g transform="translate(50, 700)">
+    <rect x="0" y="0" width="300" height="150" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="2" filter="url(#wf-shadow)"/>
+    <circle cx="30" cy="30" r="16" fill="#16a34a"/>
+    <text x="30" y="36" font-size="14" font-weight="800" text-anchor="middle" fill="#FFFFFF">7</text>
+    <text x="60" y="35" font-size="14" font-weight="700" fill="#14532d">Reverse DDPM Sampling</text>
+    <text x="15" y="65" font-size="12" fill="#334155"><tspan font-weight="600">generate_samples()</tspan></text>
+    <text x="15" y="85" font-size="11" fill="#64748b">• Sample pure Gaussian noise <tspan font-family="monospace">x_T</tspan></text>
+    <text x="15" y="103" font-size="11" fill="#64748b">• Iterative denoising T-1 down to 0</text>
+    <text x="15" y="121" font-size="11" fill="#64748b">• Yields synthetic tensor <tspan font-family="monospace">(N_gen, D)</tspan></text>
+    <rect x="15" y="132" width="270" height="10" rx="2" fill="#bbf7d0"/>
+  </g>
+
+  <!-- Arrow 7 -> 8 -->
+  <path d="M 350 775 L 430 775" stroke="#16a34a" stroke-width="2.5" marker-end="url(#wf-arrow)"/>
+
+  <!-- Step 8: Inverse Decoding -->
+  <g transform="translate(430, 700)">
+    <rect x="0" y="0" width="340" height="150" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="2" filter="url(#wf-shadow)"/>
+    <circle cx="30" cy="30" r="16" fill="#16a34a"/>
+    <text x="30" y="36" font-size="14" font-weight="800" text-anchor="middle" fill="#FFFFFF">8</text>
+    <text x="60" y="35" font-size="14" font-weight="700" fill="#14532d">Inverse Pipeline Decoding</text>
+    <text x="15" y="65" font-size="12" fill="#334155"><tspan font-weight="600">pipeline.inverse_transform()</tspan></text>
+    <text x="15" y="85" font-size="11" fill="#64748b">• Scaler inverse transforms continuous</text>
+    <text x="15" y="103" font-size="11" fill="#64748b">• Argmax decoding for One-Hot categorical</text>
+    <text x="15" y="121" font-size="11" fill="#64748b">• MissingnessHandler restores NaNs</text>
+    <rect x="15" y="132" width="310" height="10" rx="2" fill="#bbf7d0"/>
+  </g>
+
+  <!-- Arrow 8 -> 9 -->
+  <path d="M 770 775 L 850 775" stroke="#16a34a" stroke-width="2.5" marker-end="url(#wf-arrow)"/>
+
+  <!-- Step 9: Evaluation & Report Generation -->
+  <g transform="translate(850, 700)">
+    <rect x="0" y="0" width="600" height="150" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="2" filter="url(#wf-shadow)"/>
+    <circle cx="30" cy="30" r="16" fill="#16a34a"/>
+    <text x="30" y="36" font-size="14" font-weight="800" text-anchor="middle" fill="#FFFFFF">9</text>
+    <text x="60" y="35" font-size="14" font-weight="700" fill="#14532d">Quality &amp; Privacy Evaluation (Reports)</text>
+    <text x="15" y="65" font-size="12" fill="#334155"><tspan font-weight="600">UtilityEvaluator &amp; PrivacyEvaluator</tspan></text>
+    <text x="15" y="85" font-size="11" fill="#64748b">• Distance-Based Membership Inference Attack (<tspan font-weight="600">D-MIA</tspan> score &lt; 0.5)</text>
+    <text x="15" y="103" font-size="11" fill="#64748b">• Univariate Fidelity (<tspan font-weight="600">KS-test</tspan> &amp; <tspan font-weight="600">TVD</tspan>) &amp; Bivariate Correlation RMSE</text>
+    <text x="15" y="121" font-size="11" fill="#15803d">• Saves <tspan font-family="monospace">synthetic_eps_{target}.csv</tspan> &amp; <tspan font-family="monospace">sweep_report.json</tspan></text>
+    <rect x="15" y="132" width="570" height="10" rx="2" fill="#bbf7d0"/>
+  </g>
+</svg>

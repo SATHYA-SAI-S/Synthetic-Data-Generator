@@ -103,7 +103,6 @@ class DPTrainer:
             # Apply forward diffusion process
             x_t, true_noise = forward_diffuse(x_0, t, self.schedule)
             x_t = x_t.to(self.device)
-            x_t.requires_grad_()
             true_noise = true_noise.to(self.device)
             
             self.optimizer.zero_grad()
@@ -113,17 +112,32 @@ class DPTrainer:
             
             # L2 loss per sample
             loss_per_sample = self.criterion(pred_noise, true_noise).mean(dim=1)
+            batch_loss = loss_per_sample.mean()
+            
+            # C-1 FIX: NaN guard — a NaN/Inf loss means divergence; fail fast
+            # instead of checkpointing a poisoned model and exporting garbage.
+            if not torch.isfinite(batch_loss):
+                raise FloatingPointError(
+                    "DPTrainer: loss became NaN/Inf. Training has diverged "
+                    "(noise multiplier too high relative to clip norm, or lr too large). "
+                    "Reduce base_sigma / learning rate and restart."
+                )
             
             # Backprop to populate .grad_sample
-            loss_per_sample.mean().backward()
+            batch_loss.backward()
             
-            # Compute average timestep for adaptive schedule, clamped safely
-            mean_t = int(t.float().mean().item())
-            mean_t = max(0, min(mean_t, self.privacy_schedule.num_timesteps - 1))
-            sigma_t = self.privacy_schedule.get_sigma(mean_t)
+            # P-4 FIX: use the MINIMUM sigma over the batch's timesteps for both
+            # noise addition and accounting. Per-sample timesteps differ; using the
+            # min sigma is the conservative (privacy-preserving) choice and keeps
+            # the RDP composition valid for the whole batch.
+            t_min = int(t.min().item())
+            t_min = max(0, min(t_min, self.privacy_schedule.num_timesteps - 1))
+            sigma_t = self.privacy_schedule.get_sigma(t_min)
             
-            # Apply distinct clip norm and noise per tier
-            for tier_name, params in self.tier_params.items():
+            # Apply distinct clip norm and noise per tier.
+            # P-2 FIX: the accountant records ONE step per batch (passed only on
+            # the first tier), not once per tier.
+            for i, (tier_name, params) in enumerate(self.tier_params.items()):
                 clip_norm = self.tier_clip_norms[tier_name]
                 
                 clip_and_noise_tier(
@@ -132,7 +146,18 @@ class DPTrainer:
                     noise_multiplier=sigma_t,
                     batch_size=batch_size,
                     dataset_size=self.dataset_size,
-                    accountant=self.accountant
+                    accountant=self.accountant if i == 0 else None
+                )
+            
+            # C-1 FIX: guard against NaN gradients before stepping
+            grad_finite = all(
+                p.grad is None or torch.isfinite(p.grad).all()
+                for p in self.denoiser.parameters()
+            )
+            if not grad_finite:
+                raise FloatingPointError(
+                    "DPTrainer: non-finite gradients detected after clipping/noise. "
+                    "Aborting to prevent model corruption."
                 )
             
             # Update parameters

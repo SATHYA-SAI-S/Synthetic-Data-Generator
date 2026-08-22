@@ -71,7 +71,10 @@ class UtilityEvaluator:
         # Intersect numeric columns to ensure identical order and alignment
         common_cols = [c for c in real_num.columns if c in synth_num.columns]
         if len(common_cols) < 2:
-            return 0.0
+            # E-3 FIX: 0.0 means "perfect" — returning it for an unmeasurable
+            # case is misleading. Return NaN so callers can flag it.
+            log.warning("evaluate_bivariate_correlation_rmse: <2 common numeric columns; returning NaN.")
+            return float('nan')
             
         corr_real = real_num[common_cols].corr().fillna(0.0).values
         corr_synth = synth_num[common_cols].corr().fillna(0.0).values

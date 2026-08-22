@@ -114,8 +114,11 @@ def run_sweep(
         
         schedule = LinearNoiseSchedule(num_timesteps=num_timesteps, device=device)
         
-        # Adjust base_sigma so that high epsilon gets low noise, and low epsilon gets high noise
-        base_sigma = 15.0 / target_eps
+        # C-2 FIX: cap the noise multiplier. Previously sigma = 15/eps gave sigma=150
+        # for eps=0.1 — pure-noise training that diverged to NaN. A capped sigma plus
+        # the closed-loop epsilon stop below reaches the target budget safely.
+        MAX_SIGMA = 4.0
+        base_sigma = min(15.0 / target_eps, MAX_SIGMA)
         privacy_schedule = AdaptiveNoiseSchedule(base_sigma=base_sigma, num_timesteps=num_timesteps, strategy="linear")
         accountant = CentralPrivacyAccountant()
         optimizer = torch.optim.Adam(denoiser.parameters(), lr=1e-3)
@@ -141,6 +144,11 @@ def run_sweep(
         for epoch in tqdm(range(num_epochs), desc=f"Training eps={target_eps}"):
             loss = trainer.train_epoch(loader)
             eps_spent = accountant.get_epsilon(target_delta=1e-5)
+            # P-1 FIX: closed-loop epsilon stop — never train past the target budget.
+            if eps_spent >= target_eps:
+                log.info(f"Target epsilon {target_eps} reached at epoch {epoch+1} "
+                         f"(eps spent={eps_spent:.4f}). Stopping training.")
+                break
             
         # Save model checkpoint
         ckpt_dir = os.path.join(output_dir, "checkpoints")
@@ -166,6 +174,20 @@ def run_sweep(
         # 9. Decoding
         log.info("Inverse transforming to CSV...")
         synthetic_df = pipeline.inverse_transform(synthetic_tensor.cpu().numpy())
+        
+        # C-3/C-4 FIX: output validation gate — refuse to export garbage.
+        n_all_nan_cols = int(synthetic_df.isna().all().sum())
+        if n_all_nan_cols > 0:
+            raise ValueError(
+                f"Generation failed: {n_all_nan_cols}/{synthetic_df.shape[1]} columns are "
+                "entirely NaN. The model likely diverged; refusing to export."
+            )
+        uniqueness = synthetic_df.drop_duplicates().shape[0] / max(1, len(synthetic_df))
+        if uniqueness < 0.01:
+            raise ValueError(
+                f"Generation failed: synthetic row uniqueness {uniqueness:.4f} < 0.01 "
+                "(model collapse). Refusing to export."
+            )
         
         out_file = os.path.join(output_dir, f"synthetic_eps_{target_eps}.csv")
         synthetic_df.to_csv(out_file, index=False)
