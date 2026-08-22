@@ -1,7 +1,7 @@
 pandas
 numpy
 torch==2.3.1
-opacus
+opacus==1.4.1
 joblib
 pydantic
 tqdm
