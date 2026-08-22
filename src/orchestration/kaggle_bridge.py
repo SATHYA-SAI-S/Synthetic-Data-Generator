@@ -129,7 +129,7 @@ class KaggleJob:
 
 def _run(cmd: str, timeout: Optional[int] = None) -> subprocess.CompletedProcess:
     return subprocess.run(
-        cmd, shell=True, capture_output=True, text=True, timeout=timeout,
+        cmd, shell=True, capture_output=True, text=True, encoding='utf-8', timeout=timeout,
         env={**os.environ, "PYTHONIOENCODING": "utf-8"},
     )
 
