@@ -265,7 +265,7 @@ class KaggleBridge:
         """Pull latest output files and read progress.json written by the kernel."""
         out_dir = Path(self.job.session_dir) / "kaggle_output"
         out_dir.mkdir(parents=True, exist_ok=True)
-        _run(f'kaggle kernels output {self.job.slug_kernel} -p "{out_dir}"')
+        _run(f'kaggle kernels output {self.job.slug_kernel} -p "{out_dir}" --quiet')
         pj = out_dir / "progress.json"
         if pj.exists():
             try:
@@ -311,7 +311,7 @@ class KaggleBridge:
         """Download final artifacts into sessions/<id>/kaggle_results/."""
         results = Path(self.job.session_dir) / "kaggle_results"
         results.mkdir(parents=True, exist_ok=True)
-        proc = _run(f'kaggle kernels output {self.job.slug_kernel} -p "{results}"')
+        proc = _run(f'kaggle kernels output {self.job.slug_kernel} -p "{results}" --quiet')
         if proc.returncode != 0:
             err = classify_kaggle_error((proc.stdout or "") + (proc.stderr or ""))
             append_error_ledger(self.job.session_dir, err)
