@@ -1,6 +1,6 @@
 pandas
 numpy
-torch
+torch==2.3.1
 opacus
 joblib
 pydantic

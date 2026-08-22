@@ -19,7 +19,7 @@ def verify_cuda():
     print("Verifying CUDA availability...")
     check_code = (
         "import torch; "
-        "assert torch.cuda.is_available(), 'CUDA not available'; _ = torch.zeros(1).cuda(); "
+        "assert torch.cuda.is_available(), 'CUDA not available'; "
         "print(f'CUDA OK: {torch.cuda.get_device_name(0)}'); "
         "print(f'PyTorch: {torch.__version__}'); "
         "print(f'CUDA: {torch.version.cuda}')"

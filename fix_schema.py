@@ -1,4 +1,11 @@
+import os
+import uuid
+import json
 
+with open('ui/state_schema.py', 'r', encoding='utf-8') as f:
+    schema = f.read()
+
+new_schema = """
 import os
 import uuid
 import json
@@ -19,7 +26,7 @@ def save_session():
         json.dump(dump, f)
 
 def init_session_state():
-    """Initialize session state defaults if not already present."""
+    \"\"\"Initialize session state defaults if not already present.\"\"\"
     if "session_id" not in st.session_state:
         restored = False
         if os.path.exists("sessions/last_session.txt"):
@@ -79,7 +86,7 @@ def init_session_state():
             st.session_state[k] = v
 
 def reset_session():
-    """Reset session state to initial uncompleted state for new upload."""
+    \"\"\"Reset session state to initial uncompleted state for new upload.\"\"\"
     st.cache_data.clear()
     new_id = "session_" + str(uuid.uuid4())[:8]
     st.session_state.session_id = new_id
@@ -95,3 +102,7 @@ def reset_session():
 
     st.session_state.step = 1
     save_session()
+"""
+
+with open('ui/state_schema.py', 'w', encoding='utf-8') as f:
+    f.write(new_schema)

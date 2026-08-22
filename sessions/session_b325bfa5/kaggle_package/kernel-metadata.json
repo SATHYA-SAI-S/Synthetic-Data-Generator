@@ -1,16 +1,17 @@
 {
-  "id": "kingtime248/dp-sgd-synthetic-pipeline",
-  "title": "dp-sgd-synthetic-pipeline",
+  "id": "kingtime248/advt-dp-sgd-1787381053",
+  "title": "advt dp sgd 1787381053",
   "code_file": "run_pipeline.py",
   "language": "python",
   "kernel_type": "script",
-  "is_private": false,
+  "is_private": true,
   "enable_gpu": true,
   "enable_tpu": false,
   "enable_internet": true,
-  "dataset_sources": [],
+  "dataset_sources": [
+    "kingtime248/advt-session-1787381053"
+  ],
   "competition_sources": [],
   "kernel_sources": [],
-  "model_sources": [],
-  "accelerator": "nvidiaTeslaT4"
+  "model_sources": []
 }

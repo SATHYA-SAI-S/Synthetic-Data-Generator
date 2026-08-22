@@ -28,6 +28,24 @@ def render_screen1():
     session_dir = f"sessions/{session_id}"
     os.makedirs(session_dir, exist_ok=True)
     
+    # --- Recent Sessions Dropdown ---
+    available_sessions = []
+    if os.path.exists("sessions"):
+        for d in os.listdir("sessions"):
+            if d.startswith("session_") and os.path.exists(f"sessions/{d}/raw_upload.csv"):
+                available_sessions.append(d)
+    
+    if available_sessions:
+        col_s1, col_s2, col_s3 = st.columns([1, 3, 1])
+        with col_s2:
+            st.markdown("### Resume Previous Session")
+            selected_session = st.selectbox("Select an existing session to resume:", ["-- Select --"] + sorted(available_sessions, reverse=True))
+            if selected_session != "-- Select --" and selected_session != st.session_state.get("session_id"):
+                with open("sessions/last_session.txt", "w") as f:
+                    f.write(selected_session)
+                st.session_state.clear()
+                st.rerun()
+                
     # Prominent Upload Box (Centered Layout)
     col_l, col_mid, col_r = st.columns([1, 3, 1])
     

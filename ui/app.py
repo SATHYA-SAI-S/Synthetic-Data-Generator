@@ -11,7 +11,7 @@ if WORKSPACE_ROOT not in sys.path:
     sys.path.insert(0, WORKSPACE_ROOT)
 
 import streamlit as st
-from ui.state_schema import init_session_state
+from ui.state_schema import init_session_state, save_session
 from ui.components.kpi_ribbon import render_kpi_ribbon
 from ui.components.sidebar import render_sidebar
 from ui.screens.screen1_ingestion import render_screen1
@@ -76,3 +76,7 @@ elif step == 4:
     render_screen4()
 else:
     render_screen1()
+
+
+# Persist session on every run
+save_session()

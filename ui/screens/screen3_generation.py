@@ -101,7 +101,15 @@ def _run_kaggle_route(session_dir: str, clean_cols, target_size: int):
         set_stage("DP-SGD Training", "running", "Polling kernel status...")
 
         last_pct = 0
-        final_job = bridge.watch(on_update=lambda job: None)
+        def _update_ui(job):
+            prog = job.progress or {}
+            pct = int(prog.get("pct", 0))
+            loss = prog.get("loss", 0.0)
+            stage = prog.get("stage", job.status)
+            progress_bar.progress(min(pct, 99))
+            status_text.markdown(f"**Kaggle {stage}... {pct}% (loss: {loss:.4f})**")
+
+        final_job = bridge.watch(on_update=_update_ui)
         prog = bridge.job.progress
         if prog:
             last_pct = int(prog.get("pct", 100))
