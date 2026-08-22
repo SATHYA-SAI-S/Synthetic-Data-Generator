@@ -72,7 +72,7 @@ VERDICT:              MATHEMATICALLY PRIVATE & ZERO MEMORIZATION
             data=csv_bytes,
             file_name=f"synthetic_{ds_name.replace('.csv','')}_clean.csv" if ds_name else "synthetic_clinical_clean.csv",
             mime="text/csv",
-            use_container_width=True,
+            width='stretch',
             type="primary"
         )
         st.caption("Includes all post-processing domain bounds and integer casting.")
@@ -83,7 +83,7 @@ VERDICT:              MATHEMATICALLY PRIVATE & ZERO MEMORIZATION
             data=cert_bytes,
             file_name=f"privacy_certificate_{session_id}.txt",
             mime="text/plain",
-            use_container_width=True
+            width='stretch'
         )
         st.caption("Cryptographic proof of (Epsilon, Delta)-DP and negative MIA advantage score.")
 
@@ -94,7 +94,7 @@ VERDICT:              MATHEMATICALLY PRIVATE & ZERO MEMORIZATION
             data=report_bytes,
             file_name="evaluation_report.txt",
             mime="text/plain",
-            use_container_width=True
+            width='stretch'
         )
         st.caption("Comprehensive 10-objective verification breakdown.")
         
@@ -104,7 +104,7 @@ VERDICT:              MATHEMATICALLY PRIVATE & ZERO MEMORIZATION
             data=manifest_bytes,
             file_name=f"run_manifest_{session_id}.json",
             mime="application/json",
-            use_container_width=True
+            width='stretch'
         )
         st.caption("Exact hyperparameter configurations, seeds, and library versions.")
         

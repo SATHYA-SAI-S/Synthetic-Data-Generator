@@ -64,12 +64,6 @@ def _run_kaggle_route(session_dir: str, clean_cols, target_size: int):
         set_stage("Packaging & Push", "failed", "Missing Kaggle credentials")
         return None, None
 
-    consent = st.checkbox(
-        "I understand the de-identified dataset will be uploaded to my private Kaggle dataset "
-        "for GPU training.", key="kaggle_consent")
-    if not consent:
-        st.info("Consent required to start the Kaggle training job.")
-        return None, None
 
     # Set env credentials for the kaggle CLI
     os.environ["KAGGLE_USERNAME"] = creds["username"]
@@ -215,7 +209,16 @@ def render_screen3():
         st.checkbox("Cast categorical ID codes to integer types", value=True, disabled=True)
         st.checkbox("Restore natural clinical missingness flags", value=True, disabled=True)
 
-        if st.button("Trigger Full Generation & Sanitization", type="primary", use_container_width=True):
+        if route == "kaggle":
+            creds = st.session_state.get("kaggle_credentials", {})
+            if creds.get("username") and creds.get("key"):
+                st.markdown("<div style='color: #4ADE80; font-size: 0.9rem; margin-bottom: 8px;'>&#10003; Credentials loaded from Automation Settings.</div>", unsafe_allow_html=True)
+            else:
+                st.markdown("<div style='color: #F87171; font-size: 0.9rem; margin-bottom: 8px;'>&#10007; Missing Kaggle credentials in Automation Settings.</div>", unsafe_allow_html=True)
+            
+            st.checkbox("I understand the de-identified dataset will be uploaded to my private Kaggle dataset for GPU training.", key="kaggle_consent")
+            
+        if st.button("Trigger Full Generation & Sanitization", type="primary", width='stretch'):
             raw_path = os.path.join(session_dir, "raw_upload.csv")
             if not os.path.exists(raw_path):
                 st.error("No uploaded dataset found in this session.")
@@ -226,6 +229,9 @@ def render_screen3():
             target_size = len(raw_df)
 
             if route == "kaggle":
+                if not st.session_state.get("kaggle_consent", False):
+                    st.error("Consent required to start the Kaggle training job.")
+                    return
                 got_raw, synth_df = _run_kaggle_route(session_dir, clean_cols, target_size)
             else:
                 got_raw, synth_df = _run_adapter_route(session_dir, clean_cols, target_size)
@@ -262,6 +268,6 @@ def render_screen3():
     st.markdown("<br>", unsafe_allow_html=True)
     col_nav1, col_nav2 = st.columns([1, 4])
     with col_nav1:
-        if st.button("Open OP Dashboard ->", type="primary", use_container_width=True):
+        if st.button("Open OP Dashboard ->", type="primary", width='stretch'):
             st.session_state.step = 4
             st.rerun()

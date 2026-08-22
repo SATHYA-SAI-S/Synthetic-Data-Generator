@@ -76,7 +76,7 @@ def render_screen2():
             markers=True, title="Tabular Diffusion Training Loss Convergence"
         )
         fig_loss.update_layout(height=260, paper_bgcolor='rgba(0,0,0,0)', font={'color': "#F8FAFC"})
-        st.plotly_chart(fig_loss, use_container_width=True)
+        st.plotly_chart(fig_loss, width='stretch')
         
         st.markdown("""
         <div class="synth-card">
@@ -100,7 +100,7 @@ def render_screen2():
     st.markdown("---")
     col_nav1, col_nav2 = st.columns([1, 4])
     with col_nav1:
-        if st.button("Proceed to Synthesis & Guardrails ->", type="primary", use_container_width=True):
+        if st.button("Proceed to Synthesis & Guardrails ->", type="primary", width='stretch'):
             st.session_state.training_complete = True
             st.session_state.step = 3
             st.rerun()

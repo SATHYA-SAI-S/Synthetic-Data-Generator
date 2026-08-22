@@ -237,7 +237,7 @@ def render_screen1():
         st.markdown("<br>", unsafe_allow_html=True)
         col_n1, col_n2, col_n3 = st.columns([1, 2, 1])
         with col_n2:
-            if st.button("Proceed to Privacy & DP Training ->", type="primary", use_container_width=True):
+            if st.button("Proceed to Privacy & DP Training ->", type="primary", width='stretch'):
                 st.session_state.step = 2
                 st.rerun()
     else:

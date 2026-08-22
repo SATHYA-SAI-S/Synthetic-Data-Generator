@@ -32,7 +32,7 @@ def render_sidebar():
         for num, label in steps:
             is_active = (step == num)
             btn_type = "primary" if is_active else "secondary"
-            if st.button(label, key=f"step_btn_{num}", use_container_width=True, type=btn_type):
+            if st.button(label, key=f"step_btn_{num}", width='stretch', type=btn_type):
                 st.session_state.step = num
                 st.rerun()
                 
@@ -95,7 +95,7 @@ def render_sidebar():
         """, unsafe_allow_html=True)
         
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("Reset Session / New Upload", use_container_width=True):
+        if st.button("Reset Session / New Upload", width='stretch'):
             reset_session()
             st.toast("Session reset. Ready for new upload.")
             st.rerun()

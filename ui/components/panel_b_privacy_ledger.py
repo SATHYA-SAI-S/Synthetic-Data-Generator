@@ -84,4 +84,4 @@ def render_panel_b():
         "Grad Clip Norm": [1.0, 1.0, 1.0, 1.0, 1.0],
         "Privacy Status": ["SAFE", "SAFE", "SAFE", "SAFE", "SAFE"]
     }
-    st.dataframe(pd.DataFrame(epoch_data), use_container_width=True)
+    st.dataframe(pd.DataFrame(epoch_data), width='stretch')

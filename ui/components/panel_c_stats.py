@@ -56,11 +56,11 @@ def render_panel_c():
             with c1:
                 fig1 = px.imshow(real_corr, text_auto=".2f", color_continuous_scale="Blues", title="Real Patient Dataset Correlation")
                 fig1.update_layout(height=420, paper_bgcolor='rgba(0,0,0,0)', font={'color': "#F8FAFC"})
-                st.plotly_chart(fig1, use_container_width=True)
+                st.plotly_chart(fig1, width='stretch')
             with c2:
                 fig2 = px.imshow(synth_corr, text_auto=".2f", color_continuous_scale="Blues", title=f"Synthetic Dataset (Epsilon={active_eps}) Correlation")
                 fig2.update_layout(height=420, paper_bgcolor='rgba(0,0,0,0)', font={'color': "#F8FAFC"})
-                st.plotly_chart(fig2, use_container_width=True)
+                st.plotly_chart(fig2, width='stretch')
                 
             rmse = np.sqrt(np.mean((real_corr.fillna(0).values - synth_corr.fillna(0).values) ** 2))
             st.success(f"**Bivariate Correlation RMSE = {rmse:.4f}** (Strict Clinical Threshold &lt; 0.35: **PASSED**)")
@@ -68,7 +68,7 @@ def render_panel_c():
             synth_corr = synth_df[synth_num_cols[:8]].corr()
             fig = px.imshow(synth_corr, text_auto=".2f", color_continuous_scale="Blues", title=f"Synthetic Dataset (Epsilon={active_eps}) Correlation")
             fig.update_layout(height=420, paper_bgcolor='rgba(0,0,0,0)', font={'color': "#F8FAFC"})
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
         else:
             st.info("Continuous numeric columns profiled dynamically from uploaded dataset.")
 
@@ -110,9 +110,9 @@ def render_panel_c():
             )
             fig_bar.add_hline(y=0.35, line_dash="dash", line_color="#EF4444", annotation_text="Acceptable Ceiling (0.35)")
             fig_bar.update_layout(height=360, paper_bgcolor='rgba(0,0,0,0)', font={'color': "#F8FAFC"})
-            st.plotly_chart(fig_bar, use_container_width=True)
+            st.plotly_chart(fig_bar, width='stretch')
         with col_tvd2:
-            st.dataframe(df_tvd, use_container_width=True, height=360)
+            st.dataframe(df_tvd, width='stretch', height=360)
 
     # TAB 3: TSTR Benchmark
     with tab3:
@@ -127,13 +127,13 @@ def render_panel_c():
             "Accuracy": ["88.91%", "88.84%", "99.92% Retained"],
             "Clinical Task": ["Clinical Outcome Prediction", "Clinical Outcome Prediction", "Target > 60% PASS"]
         })
-        st.dataframe(tstr_data, use_container_width=True)
+        st.dataframe(tstr_data, width='stretch')
         
         fig_tstr = go.Figure()
         fig_tstr.add_trace(go.Bar(name='TRTR (Real)', x=['AUC-ROC Retention'], y=[100.0], marker_color='#1A73E8'))
         fig_tstr.add_trace(go.Bar(name='TSTR (Synthetic)', x=['AUC-ROC Retention'], y=[72.39], marker_color='#22C55E'))
         fig_tstr.update_layout(barmode='group', height=280, paper_bgcolor='rgba(0,0,0,0)', font={'color': "#F8FAFC"}, yaxis_title="Retention %")
-        st.plotly_chart(fig_tstr, use_container_width=True)
+        st.plotly_chart(fig_tstr, width='stretch')
 
     # TAB 4: Integrity Audit
     with tab4:

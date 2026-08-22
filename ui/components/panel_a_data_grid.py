@@ -53,7 +53,7 @@ def render_panel_a():
     # Enhanced DataFrame display
     st.dataframe(
         page_df,
-        use_container_width=True,
+        width='stretch',
         height=400
     )
     
