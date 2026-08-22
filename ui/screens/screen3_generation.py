@@ -245,6 +245,18 @@ def render_screen3():
                 got_raw, synth_df = _run_adapter_route(session_dir, clean_cols, target_size)
 
             if synth_df is not None and len(synth_df) > 0:
+                pass  # normal path — synth_df already loaded from route
+            else:
+                # Recovery path: UI may have disconnected mid-run but the CSV
+                # was already written to disk by a previous successful pull.
+                recovery_path = os.path.join(session_dir, "synthetic_clean.csv")
+                if os.path.exists(recovery_path):
+                    st.info("Recovered existing synthetic data from disk — running audit.")
+                    synth_df = pd.read_csv(recovery_path)
+                    if got_raw is None:
+                        got_raw = pd.read_csv(os.path.join(session_dir, "raw_upload.csv"))
+
+            if synth_df is not None and len(synth_df) > 0:
                 try:
                     _run_red_team_audit(session_dir, got_raw, synth_df)
                 except Exception as e:

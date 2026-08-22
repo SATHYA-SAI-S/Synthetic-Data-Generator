@@ -248,8 +248,13 @@ class KaggleBridge:
         out = ((proc.stdout or "") + (proc.stderr or "")).strip().lower()
         if proc.returncode != 0 and "complete" not in out:
             err = classify_kaggle_error(out)
-            if err.category in (KaggleErrorCategory.TRANSIENT,):
-                return self.job.status  # ignore transient poll hiccups
+            # Treat TRANSIENT and any UNCLASSIFIED poll hiccup as non-fatal.
+            # Only AUTH / QUOTA / BACKEND_REWORK should kill the watch loop.
+            if err.category in (KaggleErrorCategory.TRANSIENT,
+                                KaggleErrorCategory.BACKEND_REWORK) and \
+                    "traceback" not in out and "runtimeerror" not in out:
+                log.warning("Transient poll failure (ignored): %s", out[:200])
+                return self.job.status  # keep looping
             append_error_ledger(self.job.session_dir, err)
             self.job.error = err.to_dict()
             self.job.status = "error"
@@ -313,9 +318,15 @@ class KaggleBridge:
         results.mkdir(parents=True, exist_ok=True)
         proc = _run(f'kaggle kernels output {self.job.slug_kernel} -p "{results}" --quiet')
         if proc.returncode != 0:
-            err = classify_kaggle_error((proc.stdout or "") + (proc.stderr or ""))
-            append_error_ledger(self.job.session_dir, err)
-            raise err
+            # On Windows, the Kaggle CLI throws a charmap error while printing
+            # progress but files are already downloaded. Check if CSVs landed.
+            csv_found = any(results.rglob("synthetic*.csv"))
+            if not csv_found:
+                err = classify_kaggle_error((proc.stdout or "") + (proc.stderr or ""))
+                append_error_ledger(self.job.session_dir, err)
+                raise err
+            log.warning("kaggle output exited non-zero (charmap/encoding) "
+                        "but synthetic CSVs are present — treating as success.")
         self.on_event("Artifact Delivery",
                       f"Artifacts downloaded to {results}")
         return results

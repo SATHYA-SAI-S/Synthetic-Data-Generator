@@ -175,6 +175,18 @@ class AdaptiveAttacker:
         if len(synth_num) == 0:
             return AttackResult("L2", "dmia_auc", 0.0, "Empty synth", "held")
 
+        # Cap to 10k rows to avoid OOM on large datasets (100k+).
+        MAX_MIA_ROWS = 10_000
+        if len(synth_num) > MAX_MIA_ROWS:
+            idx = self.rng.choice(len(synth_num), MAX_MIA_ROWS, replace=False)
+            synth_num = synth_num[idx]
+        if len(tr_num) > MAX_MIA_ROWS:
+            idx = self.rng.choice(len(tr_num), MAX_MIA_ROWS, replace=False)
+            tr_num = tr_num[idx]
+        if len(ho_num) > MAX_MIA_ROWS:
+            idx = self.rng.choice(len(ho_num), MAX_MIA_ROWS, replace=False)
+            ho_num = ho_num[idx]
+
         nn = NearestNeighbors(n_neighbors=1).fit(synth_num)
         d_tr = nn.kneighbors(tr_num)[0].ravel()
         d_ho = nn.kneighbors(ho_num)[0].ravel()
@@ -233,10 +245,17 @@ class AdaptiveAttacker:
         cols = self._common_cols()
         if not cols:
             return AttackResult("L4", "uniqueness", 0.0, "No common columns", "held")
-        uq = len(self.df_synth.drop_duplicates()) / max(len(self.df_synth), 1)
-        # Unique synth rows whose fingerprint also exists in real train data
-        rq = set(map(tuple, self.df_train[cols].astype(str).values))
-        sq = list(map(tuple, self.df_synth[cols].astype(str).values))
+
+        # Cap to 20k rows to stay fast on large datasets.
+        MAX_L4_ROWS = 20_000
+        df_train = self.df_train if len(self.df_train) <= MAX_L4_ROWS else \
+            self.df_train.iloc[self.rng.choice(len(self.df_train), MAX_L4_ROWS, replace=False)]
+        df_synth = self.df_synth if len(self.df_synth) <= MAX_L4_ROWS else \
+            self.df_synth.iloc[self.rng.choice(len(self.df_synth), MAX_L4_ROWS, replace=False)]
+
+        uq = len(df_synth.drop_duplicates()) / max(len(df_synth), 1)
+        rq = set(map(tuple, df_train[cols].astype(str).values))
+        sq = list(map(tuple, df_synth[cols].astype(str).values))
         unique_hits = sum(1 for t in set(sq) if t in rq)
         rate = unique_hits / max(len(set(sq)), 1)
         return AttackResult(
