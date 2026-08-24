@@ -1,21 +1,35 @@
 """
 SYNTHGUARD Component - Differential Privacy Epsilon Gauge
+Fully adaptive: shows the actual spent epsilon or a pending placeholder.
 """
 import streamlit as st
 import plotly.graph_objects as go
 
-def render_epsilon_gauge(spent: float = 0.3720, target: float = 1.0):
-    """Render a semi-circular gauge displaying privacy budget expenditure."""
-    pct_used = min(100.0, (spent / target) * 100.0) if target > 0 else 0
-    
+
+def render_epsilon_gauge(spent=None, target: float = 1.0):
+    """Render a semi-circular gauge of privacy budget expenditure (adaptive)."""
+    if spent is None:
+        # No run yet - show placeholder rather than fabricating a number.
+        spent_val = 0.0
+        display = "Pending"
+        range_max = float(target * 1.2)
+        ref = float(target)
+    else:
+        spent_val = float(spent)
+        display = f"{spent_val:.4f}"
+        range_max = float(target * 1.2)
+        ref = float(target)
+
+    pct_used = min(100.0, (spent_val / target) * 100.0) if target > 0 else 0
+
     fig = go.Figure(go.Indicator(
-        mode = "gauge+number+delta",
-        value = spent,
-        domain = {'x': [0, 1], 'y': [0, 1]},
-        title = {'text': "Privacy Budget Spent (Epsilon)", 'font': {'size': 16, 'color': '#F8FAFC'}},
-        delta = {'reference': target, 'increasing': {'color': "#EF4444"}, 'decreasing': {'color': "#22C55E"}},
-        gauge = {
-            'axis': {'range': [None, target * 1.2], 'tickwidth': 1, 'tickcolor': "#94A3B8"},
+        mode="gauge+number",
+        value=spent_val,
+        domain={'x': [0, 1], 'y': [0, 1]},
+        title={'text': "Privacy Budget Spent (Epsilon)", 'font': {'size': 16, 'color': '#F8FAFC'}},
+        number={'suffix': "", 'font': {'color': '#F8FAFC', 'size': 24}},
+        gauge={
+            'axis': {'range': [None, range_max], 'tickwidth': 1, 'tickcolor': "#94A3B8"},
             'bar': {'color': "#1A73E8"},
             'bgcolor': "#1B2A4A",
             'borderwidth': 2,
@@ -28,11 +42,11 @@ def render_epsilon_gauge(spent: float = 0.3720, target: float = 1.0):
             'threshold': {
                 'line': {'color': "#EF4444", 'width': 4},
                 'thickness': 0.75,
-                'value': target
+                'value': ref
             }
         }
     ))
-    
+
     fig.update_layout(
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',

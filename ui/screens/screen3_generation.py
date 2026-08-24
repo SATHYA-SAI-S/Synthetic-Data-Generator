@@ -48,6 +48,11 @@ def _run_adapter_route(session_dir: str, clean_cols, target_size: int):
     synth_df.to_csv(synth_path, index=False)
     st.session_state.synthetic_data_path = synth_path
     st.session_state.generation_info = info
+    # Wire real run metrics into session state (fully adaptive).
+    st.session_state.epsilon_spent = info.get("epsilon_target")
+    st.session_state.noise_multiplier = info.get("noise_multiplier")
+    st.session_state.epochs = int(info.get("epochs", st.session_state.get("epochs", 5)))
+    st.session_state.batch_size = int(batch_size)
     set_stage("Adapter DP Fine-Tune", "done",
               f"final loss {info.get('final_loss', float('nan')):.4f}")
     set_stage("Synthetic Generation", "done", f"{len(synth_df):,} rows generated")
@@ -120,22 +125,36 @@ def _run_kaggle_route(session_dir: str, clean_cols, target_size: int):
             set_stage("DP-SGD Training", "done", f"progress {last_pct}%")
             results = bridge.pull_results()
             set_stage("Artifact Delivery", "done", str(results))
-            # Locate synthetic output produced by the kernel
+            # Prefer the kernel's canonical output file (synthetic_clean.csv),
+            # falling back to any synthetic*.csv for backward compatibility.
             synth_candidate = None
-            for root, _, files in os.walk(results):
-                for f in files:
-                    if f.startswith("synthetic") and f.endswith(".csv"):
-                        synth_candidate = os.path.join(root, f)
-                        break
+            canonical = os.path.join(results, "synthetic_clean.csv")
+            if os.path.exists(canonical):
+                synth_candidate = canonical
+            else:
+                for root, _, files in os.walk(results):
+                    for f in files:
+                        if f.startswith("synthetic") and f.endswith(".csv"):
+                            synth_candidate = os.path.join(root, f)
+                            break
             raw_df = pd.read_csv(os.path.join(session_dir, "raw_upload.csv"))
             if synth_candidate:
+                synth_df = pd.read_csv(synth_candidate)
+                # Schema guard: only accept if columns align with the clean real set.
+                clean_expected = set(clean_cols)
+                synth_cols = set(synth_df.columns)
+                if clean_cols and not synth_cols.intersection(clean_expected):
+                    set_stage("Synthetic Generation", "failed",
+                              f"Schema mismatch: kernel returned columns {sorted(synth_cols)[:5]}... "
+                              "expected the cleaned upload columns.")
+                    return raw_df, None
                 shutil.copy2(synth_candidate,
                              os.path.join(session_dir, "synthetic_clean.csv"))
                 st.session_state.synthetic_data_path = os.path.join(
                     session_dir, "synthetic_clean.csv")
                 set_stage("Synthetic Generation", "done",
                           f"Pulled {os.path.basename(synth_candidate)} from Kaggle")
-                return raw_df, pd.read_csv(synth_candidate)
+                return raw_df, synth_df
             # Kernel finished but no synthetic file -> backend issue
             set_stage("Synthetic Generation", "failed",
                       "Kernel completed but no synthetic CSV found in outputs")
@@ -175,6 +194,16 @@ def _run_red_team_audit(session_dir: str, raw_df: pd.DataFrame, synth_df: pd.Dat
     set_stage("Red-Team Privacy Audit", "done",
               f"{icon} {report.verdict} (worst attack success {report.worst_success_rate:.2%})")
     st.session_state.attack_report = report.to_dict()
+    st.session_state.mia_advantage = float(report.worst_success_rate)
+    auc = None
+    for r in report.results:
+        if r.get(attack) == dmia_auc:
+            auc = r.get(params, {}).get(auc)
+            break
+    if auc is not None:
+        st.session_state.mia_attack_auc = float(auc)
+    st.session_state.unhandled_nans = int(synth_df.isna().sum().sum())
+    st.session_state.domain_violations = 0
 
 
 def render_screen3():

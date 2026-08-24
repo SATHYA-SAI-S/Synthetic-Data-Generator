@@ -37,15 +37,24 @@ def render_screen2():
         
         c_a, c_b = st.columns(2)
         with c_a:
-            delta_choice = st.selectbox("Cryptographic Delta", ["1.0e-4", "1.0e-5", "1.0e-3"], index=0)
+            delta_choice = st.selectbox(
+                "Cryptographic Delta", ["1.0e-4", "1.0e-5", "1.0e-3"],
+                index=0 if str(st.session_state.get("delta_choice", "1.0e-4")) == "1.0e-4" else (1 if str(st.session_state.get("delta_choice", "1.0e-4")) == "1.0e-5" else 2))
         with c_b:
             epochs = st.number_input("Training Epochs", min_value=1, max_value=50, value=int(st.session_state.get("epochs", 5)))
             
         c_c, c_d = st.columns(2)
         with c_c:
-            batch_size = st.selectbox("Batch Size", [128, 256, 512, 1024], index=1)
+            batch_size = st.selectbox("Batch Size", [128, 256, 512, 1024], index=0 if int(st.session_state.get("batch_size", 256)) == 128 else (1 if int(st.session_state.get("batch_size", 256)) == 256 else (2 if int(st.session_state.get("batch_size", 256)) == 512 else 3)))
         with c_d:
-            clip_norm = st.number_input("Gradient Clip Norm (C)", min_value=0.1, max_value=5.0, value=1.0, step=0.1)
+            clip_norm = st.number_input("Gradient Clip Norm (C)", min_value=0.1, max_value=5.0, value=float(st.session_state.get("clip_norm", 1.0)), step=0.1)
+            
+        # Persist the privacy controls so Screen 3 / kernel config / dashboard
+        # use the naive user's actual selections (fully adaptive).
+        st.session_state.delta_choice = delta_choice
+        st.session_state.epochs = int(epochs)
+        st.session_state.batch_size = int(batch_size)
+        st.session_state.clip_norm = float(clip_norm)
             
         st.markdown("### Pre-Flight Privacy Estimator")
         sigma_display = max(2.5, min(8.0, 5.0 / (target_eps if target_eps > 0 else 1.0)))

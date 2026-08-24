@@ -1,0 +1,9 @@
+[
+  {
+    "ts": 1787385875.726298,
+    "category": "kernel_timeout",
+    "message": "Kernel stuck: no progress for 20 minutes.",
+    "raw": "",
+    "retriable": false
+  }
+]

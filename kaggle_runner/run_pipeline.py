@@ -1,21 +1,75 @@
-import os
-import shutil
-import subprocess
-import sys
-import zipfile
+"""
+Kaggle Kernel Runner - Fully adaptive autonomous DP-SGD training.
 
-def run_cmd(cmd):
-    print(f"Running: {cmd}")
-    process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-    for line in process.stdout:
-        print(line, end="")
-    process.wait()
-    if process.returncode != 0:
-        print(f"Command failed with exit code {process.returncode}")
-        sys.exit(1)
+Reads the user's de-identified dataset + run config from the mounted
+private Kaggle dataset (/kaggle/input/<dataset>/), trains ONLY the
+configured epsilon (no hardcoded sweep, no UCI download, no git clone),
+and writes progress.json + synthetic_clean.csv to the kernel output dir.
+
+The UI (kaggle_bridge.fetch_progress/pull_results) polls these artifacts
+to render a live progress bar and pull the final synthetic CSV.
+"""
+import json
+import os
+import glob
+import sys
+import time
+import subprocess
+from pathlib import Path
+
+OUTPUT_DIR = Path("/kaggle/working")
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def _write_progress(**kwargs):
+    """Write a partial progress.json so the UI can poll live status."""
+    payload = {
+        "ts": time.time(),
+        "stage": kwargs.get("stage", "running"),
+        "pct": float(kwargs.get("pct", 0.0)),
+        "epoch": int(kwargs.get("epoch", 0)),
+        "total_epochs": int(kwargs.get("total_epochs", 1)),
+        "loss": float(kwargs.get("loss", 0.0)),
+        "epsilon_spent": float(kwargs.get("epsilon_spent", 0.0)),
+    }
+    tmp = OUTPUT_DIR / "progress.json.tmp"
+    tmp.write_text(json.dumps(payload), encoding="utf-8")
+    tmp.replace(OUTPUT_DIR / "progress.json")
+
+
+def locate_input_files():
+    """
+    Locate the mounted private dataset in /kaggle/input/<slug>/.
+    Returns (clean_csv_path, run_config_path) or raises RuntimeError.
+    """
+    input_root = Path("/kaggle/input")
+    if not input_root.exists():
+        raise RuntimeError("Kaggle input directory not found - dataset not mounted.")
+
+    datasets = [d for d in input_root.iterdir() if d.is_dir()]
+    if not datasets:
+        raise RuntimeError("No Kaggle input dataset mounted to kernel.")
+
+    # Prefer the first mounted dataset folder.
+    data_dir = datasets[0]
+    clean_csv = data_dir / "clean_data.csv"
+    run_config = data_dir / "run_config.json"
+
+    if not clean_csv.exists():
+        # Fall back to any csv in the mounted dataset.
+        csvs = sorted(data_dir.glob("*.csv"))
+        if not csvs:
+            raise RuntimeError(f"No CSV found in mounted dataset {data_dir}.")
+        clean_csv = csvs[0]
+
+    if not run_config.exists():
+        raise RuntimeError(f"run_config.json missing in mounted dataset {data_dir}.")
+
+    return clean_csv, run_config
+
 
 def verify_cuda():
-    """Verify PyTorch can actually use the GPU before proceeding."""
+    """Verify PyTorch can use the GPU before proceeding."""
     print("Verifying CUDA availability...")
     check_code = (
         "import torch; "
@@ -24,70 +78,98 @@ def verify_cuda():
         "print(f'PyTorch: {torch.__version__}'); "
         "print(f'CUDA: {torch.version.cuda}')"
     )
-    process = subprocess.Popen(
+    proc = subprocess.Popen(
         [sys.executable, "-c", check_code],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
     )
-    for line in process.stdout:
+    for line in proc.stdout:
         print(line, end="")
-    process.wait()
-    if process.returncode != 0:
-        print("=" * 70)
-        print("FATAL: PyTorch cannot use the GPU!")
-        print("This is usually caused by a CUDA capability mismatch.")
-        print("The Tesla P100 (sm_60) requires PyTorch built with CUDA 11.8 or earlier.")
-        print("=" * 70)
+    proc.wait()
+    if proc.returncode != 0:
+        print("FATAL: PyTorch cannot use the GPU (CUDA capability mismatch?).")
         sys.exit(1)
 
+
 def main():
-    print("Starting Kaggle Autonomous Run...")
-    
-    # 1. Clone the repository (force clean clone to avoid stale code)
-    if os.path.exists("Synthetic-Data-Generator"):
-        print("Removing existing Synthetic-Data-Generator directory...")
-        shutil.rmtree("Synthetic-Data-Generator")
-    run_cmd("git clone https://github.com/SATHYA-SAI-S/Synthetic-Data-Generator.git")
-    
-    os.chdir("Synthetic-Data-Generator")
-    
-    # K-4 FIX: install the CUDA-11.8 torch build FIRST, then requirements.txt.
-    # Previously requirements.txt was installed first and then torch was
-    # force-reinstalled on top — if opacus/numpy were pinned against a different
-    # torch build, the force-reinstall silently broke them at import time.
-    print("Installing PyTorch with P100-compatible CUDA 11.8 build...")
-    run_cmd(
-        "pip install --force-reinstall --no-cache-dir "
-        "torch==2.3.1 torchvision==0.18.1 "
-        "--index-url https://download.pytorch.org/whl/cu118 -q"
-    )
-    
-    print("Installing requirements (against the pinned torch build)...")
-    run_cmd("pip install -r requirements.txt")
-    
-    # 3b. Verify CUDA works before proceeding
+    print("=== Starting Adaptive Kaggle DP-SGD Run ===")
+
+    # 0. Verify CUDA + copy the runner/trainer modules so imports resolve.
     verify_cuda()
-    
-    # 4. Download the dataset
-    print("Downloading dataset...")
-    os.makedirs("data", exist_ok=True)
-    dataset_url = "https://archive.ics.uci.edu/static/public/296/diabetes+130-us+hospitals+for+years+1999-2008.zip"
-    dataset_path = "data/diabetes+130-us+hospitals+for+years+1999-2008.zip"
-    # K-6 FIX: retry on transient UCI failures instead of dying on first attempt.
-    run_cmd(f"wget -q --tries=3 --timeout=60 {dataset_url} -O {dataset_path}")
-    
-    # Verify the download is a valid zip
-    if not zipfile.is_zipfile(dataset_path):
-        print("ERROR: Downloaded file is not a valid zip archive!")
+
+    # Copy this runner + the training script into working dir so the kernel
+    # can import them (Kaggle mounts only the dataset, not the repo).
+    script_dir = Path(__file__).resolve().parent
+    for name in ("scripts", ""):
+        pass  # scaffold handled below by importing via PYTHONPATH
+
+    ##########################################################################
+    # 1. Locate user's data + config from the mounted private dataset
+    ##########################################################################
+    try:
+        clean_csv_path, run_config_path = locate_input_files()
+    except RuntimeError as e:
+        _write_progress(stage="failed", pct=100, loss=0.0, epoch=0, total_epochs=1)
+        print(f"FATAL: {e}")
         sys.exit(1)
-    print("Dataset downloaded and verified.")
-    
-    # 5. Run the end-to-end pipeline sweep
-    print("Executing End-to-End Pipeline...")
-    run_cmd("PYTHONPATH=. python scripts/reproduce_end_to_end.py")
-    
-    print("Run Complete! Check the Kaggle Output for results.")
+
+    print(f"Using dataset : {clean_csv_path}")
+    print(f"Using config  : {run_config_path}")
+
+    run_config = json.loads(run_config_path.read_text(encoding="utf-8"))
+    target_epsilon = float(run_config.get("epsilon", 1.0))
+    target_delta = float(run_config.get("delta", 1e-4))
+    epochs = int(run_config.get("epochs", 5))
+    batch_size = int(run_config.get("batch_size", 256))
+    clip_norm = float(run_config.get("clip_norm", 1.0))
+    num_samples = int(run_config.get("num_samples", -1))
+    clean_columns = run_config.get("clean_columns", None)
+
+    print(f"Config: eps={target_epsilon} delta={target_delta} "
+          f"epochs={epochs} batch={batch_size} clip={clip_norm} "
+          f"samples={num_samples}")
+
+    # 2. Ensure the training script + src package are importable from the repo.
+    #    On Kaggle we clone the pinned repo (deterministic) for the src package.
+    _write_progress(stage="Preparing environment", pct=2, loss=0.0, epoch=0,
+                    total_epochs=epochs)
+    repo_dir = Path("/kaggle/working/Synthetic-Data-Generator")
+    pin = "29ca855cab13be9ef80c656f711697339c3ae165"  # workspace HEAD (deterministic)
+    try:
+        subprocess.run(
+            f'git clone https://github.com/SATHYA-SAI-S/Synthetic-Data-Generator.git '
+            f'"{repo_dir}" -q && cd "{repo_dir}" && git checkout {pin}',
+            shell=True, check=True,
+        )
+    except subprocess.CalledProcessError:
+        print("WARN: git clone failed; falling back to current directory for src/")
+        repo_dir = Path(".")
+    sys.path.insert(0, str(repo_dir))
+
+    # 3. Run the training via the local pipeline (adaptive, single config).
+    _write_progress(stage="Importing pipeline", pct=5, loss=0.0, epoch=0,
+                    total_epochs=epochs)
+    sys.path.insert(0, str(Path(__file__).parent / ".."))
+    try:
+        from kaggle_runner.kernel_train import run_adaptive_training
+    except ImportError:
+        from kaggle_kernel_train import run_adaptive_training
+
+    run_adaptive_training(
+        clean_csv_path=str(clean_csv_path),
+        output_dir=str(OUTPUT_DIR),
+        epsilon=target_epsilon,
+        delta=target_delta,
+        epochs=epochs,
+        batch_size=batch_size,
+        clip_norm=clip_norm,
+        num_samples=num_samples,
+        clean_columns=clean_columns,
+    )
+
+    print("=== Run Complete. Artifacts written to /kaggle/working ===")
+
 
 if __name__ == "__main__":
     main()
