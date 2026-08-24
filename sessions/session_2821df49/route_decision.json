@@ -1,9 +1,0 @@
-{
-  "route": "kaggle",
-  "reason": "Dataset has 101,766 clean rows (>= 10,000 threshold). Sufficient scale for full DP-SGD training on Kaggle GPU.",
-  "clean_rows": 101766,
-  "threshold": 10000,
-  "recommended_action": "Kaggle route: package de-identified data + config -> push private dataset & kernel -> stream progress -> pull artifacts.",
-  "overridden_by_user": false,
-  "decided_at": 1787380763.4794722
-}
