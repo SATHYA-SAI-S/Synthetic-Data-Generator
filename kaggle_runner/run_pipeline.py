@@ -50,22 +50,21 @@ def locate_input_files():
     if not datasets:
         raise RuntimeError("No Kaggle input dataset mounted to kernel.")
 
-    # Prefer the first mounted dataset folder.
-    data_dir = datasets[0]
-    clean_csv = data_dir / "clean_data.csv"
-    run_config = data_dir / "run_config.json"
+    # Kaggle sometimes injects system directories, so we must search all datasets.
+    for data_dir in datasets:
+        run_config = data_dir / "run_config.json"
+        clean_csv = data_dir / "clean_data.csv"
+        
+        if run_config.exists():
+            if not clean_csv.exists():
+                csvs = sorted(data_dir.glob("*.csv"))
+                if csvs:
+                    clean_csv = csvs[0]
+                else:
+                    continue # Try another directory
+            return clean_csv, run_config
 
-    if not clean_csv.exists():
-        # Fall back to any csv in the mounted dataset.
-        csvs = sorted(data_dir.glob("*.csv"))
-        if not csvs:
-            raise RuntimeError(f"No CSV found in mounted dataset {data_dir}.")
-        clean_csv = csvs[0]
-
-    if not run_config.exists():
-        raise RuntimeError(f"run_config.json missing in mounted dataset {data_dir}.")
-
-    return clean_csv, run_config
+    raise RuntimeError("run_config.json or CSV missing in all mounted datasets. Mount may have failed.")
 
 
 def verify_cuda():
