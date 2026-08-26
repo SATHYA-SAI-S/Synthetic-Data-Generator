@@ -116,6 +116,8 @@ def run_adaptive_training(
             accountant.record_step(noise_multiplier=noise_multiplier, sample_rate=sample_rate)
         eps_spent = accountant.get_epsilon(target_delta=float(delta))
         
+        print(f"Epoch {ep + 1}/{total_epochs} - Loss: {avg:.4f} - Epsilon Spent: {eps_spent:.4f}", flush=True)
+        
         write_progress(stage="DP-SGD Training",
                        pct=5 + int(88 * (ep + 1) / total_epochs),
                        epoch=ep + 1, total_epochs=total_epochs, loss=avg,
