@@ -322,16 +322,23 @@ class KaggleBridge:
         """Download final artifacts into sessions/<id>/kaggle_results/."""
         results = Path(self.job.session_dir) / "kaggle_results"
         results.mkdir(parents=True, exist_ok=True)
-        proc = _run(f'kaggle kernels output {self.job.slug_kernel} -p "{results}" --quiet')
-        if proc.returncode != 0:
+        try:
+            proc = _run(f'kaggle kernels output {self.job.slug_kernel} -p "{results}" --quiet', timeout=90)
+            ret_code = proc.returncode
+            out_err = (proc.stdout or "") + (proc.stderr or "")
+        except subprocess.TimeoutExpired:
+            ret_code = -1
+            out_err = "Timeout expired waiting for Kaggle CLI."
+            
+        if ret_code != 0:
             # On Windows, the Kaggle CLI throws a charmap error while printing
             # progress but files are already downloaded. Check if CSVs landed.
             csv_found = any(results.rglob("synthetic*.csv"))
             if not csv_found:
-                err = classify_kaggle_error((proc.stdout or "") + (proc.stderr or ""))
+                err = classify_kaggle_error(out_err)
                 append_error_ledger(self.job.session_dir, err)
                 raise err
-            log.warning("kaggle output exited non-zero (charmap/encoding) "
+            log.warning("kaggle output exited non-zero (charmap/encoding/timeout) "
                         "but synthetic CSVs are present — treating as success.")
         self.on_event("Artifact Delivery",
                       f"Artifacts downloaded to {results}")

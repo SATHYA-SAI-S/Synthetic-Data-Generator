@@ -100,6 +100,7 @@ def _run_kaggle_route(session_dir: str, clean_cols, target_size: int):
             kaggle_user=creds["username"],
             on_event=on_event,
         )
+        st.session_state.last_kaggle_slug = bridge.job.slug_kernel
         set_stage("Packaging & Push", "done", "Dataset + kernel pushed to Kaggle")
         set_stage("Kaggle Queue", "done", "Kernel accepted by Kaggle")
         set_stage("DP-SGD Training", "running", "Polling kernel status...")
@@ -297,15 +298,51 @@ def render_screen3():
                 else:
                     # Recovery path
                     recovery_path = os.path.join(session_dir, "synthetic_clean.csv")
+                    recovery_path = os.path.join(session_dir, "synthetic_clean.csv")
                     if os.path.exists(recovery_path):
                         st.info("Recovered existing synthetic data from disk — running audit.")
                         synth_df = pd.read_csv(recovery_path)
                         if got_raw is None:
                             got_raw = pd.read_csv(os.path.join(session_dir, "raw_upload.csv"))
                     else:
-                        st.error("No synthetic_clean.csv found locally. Check Kaggle for job status.")
-                        st.session_state.generation_in_progress = False
-                        return
+                        st.info("Local CSV not found. Attempting to pull directly from Kaggle...")
+                        try:
+                            from src.orchestration.kaggle_bridge import KaggleBridge, KaggleJob
+                            creds = st.session_state.get("kaggle_credentials", {})
+                            # Reconstruct the job using the latest stamp from the dataset name or just a search
+                            import glob
+                            json_files = glob.glob(os.path.join(session_dir, "run_config*.json"))
+                            slug = None
+                            if json_files:
+                                with open(json_files[0], 'r') as f:
+                                    cfg = json.load(f)
+                                    slug = cfg.get("kaggle_slug_kernel")
+                            # Or we can just try to infer it. The kernel slug is in the bridge job if it was run recently.
+                            if not slug and 'last_kaggle_slug' in st.session_state:
+                                slug = st.session_state.last_kaggle_slug
+                            
+                            if slug:
+                                job = KaggleJob(session_dir=session_dir, slug_dataset="", slug_kernel=slug)
+                                bridge = KaggleBridge(job)
+                                results = bridge.pull_results()
+                                synth_candidate = os.path.join(results, "synthetic_clean.csv")
+                                if os.path.exists(synth_candidate):
+                                    shutil.copy2(synth_candidate, recovery_path)
+                                    synth_df = pd.read_csv(recovery_path)
+                                    if got_raw is None:
+                                        got_raw = pd.read_csv(os.path.join(session_dir, "raw_upload.csv"))
+                                else:
+                                    st.error("Pulled successfully, but no synthetic_clean.csv found in Kaggle outputs.")
+                                    st.session_state.generation_in_progress = False
+                                    return
+                            else:
+                                st.error("No synthetic_clean.csv found locally, and couldn't find Kaggle slug to pull from.")
+                                st.session_state.generation_in_progress = False
+                                return
+                        except Exception as e:
+                            st.error(f"Failed to recover from Kaggle: {e}")
+                            st.session_state.generation_in_progress = False
+                            return
     
                 if synth_df is not None and len(synth_df) > 0:
                     try:
