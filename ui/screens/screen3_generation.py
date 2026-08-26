@@ -12,7 +12,6 @@ import time
 import streamlit as st
 import pandas as pd
 import numpy as np
-from ui.data_loaders.load_synthetic_csv import generate_synthetic_from_real
 from ui.components.pipeline_checklist import set_stage, render_pipeline_checklist
 
 
