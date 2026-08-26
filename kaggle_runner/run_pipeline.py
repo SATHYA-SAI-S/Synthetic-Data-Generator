@@ -95,16 +95,14 @@ def main():
     print("=== Starting Adaptive Kaggle DP-SGD Run ===")
 
     # 0. Install compatible PyTorch for P100 (sm_60) before verifying CUDA
-    print("Installing PyTorch with P100-compatible CUDA 11.8 build...")
+    print("Installing PyTorch (CUDA 11.8) and Opacus...")
     subprocess.run(
         "pip install --force-reinstall --no-cache-dir "
-        "torch==2.3.1 torchvision==0.18.1 "
-        "--index-url https://download.pytorch.org/whl/cu118 -q",
+        "torch==2.3.1 torchvision==0.18.1 torchaudio==2.3.1 "
+        "--index-url https://download.pytorch.org/whl/cu118 "
+        "opacus opt-einsum -q",
         shell=True, check=False
     )
-    
-    print("Installing Opacus for Differential Privacy...")
-    subprocess.run("pip install opacus -q", shell=True, check=False)
     
     # 0b. Verify CUDA
     verify_cuda()
