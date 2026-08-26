@@ -5,3 +5,7 @@ opacus==1.4.1
 joblib
 pydantic
 tqdm
+streamlit
+plotly
+scikit-learn
+kaggle
