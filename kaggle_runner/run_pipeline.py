@@ -103,6 +103,9 @@ def main():
         shell=True, check=False
     )
     
+    print("Installing Opacus for Differential Privacy...")
+    subprocess.run("pip install opacus -q", shell=True, check=False)
+    
     # 0b. Verify CUDA
     verify_cuda()
 
