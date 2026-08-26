@@ -76,3 +76,4 @@ def render_screen4():
 
     with tab_export:
         render_panel_d()
+# Force reload for Streamlit Watchdog
