@@ -104,6 +104,10 @@ def render_sidebar():
             if ku and kk:
                 st.session_state.kaggle_credentials = {"username": ku, "key": kk}
                 st.success("Kaggle credentials set for this session.")
+                
+            consent = st.session_state.get("kaggle_consent", False)
+            new_consent = st.checkbox("I consent to upload data to my private Kaggle account for GPU training.", value=consent)
+            st.session_state.kaggle_consent = new_consent
 
         st.markdown("---")
 

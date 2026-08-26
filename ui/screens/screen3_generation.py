@@ -52,7 +52,7 @@ def _run_adapter_route(session_dir: str, clean_cols, target_size: int):
     st.session_state.epsilon_spent = info.get("epsilon_target")
     st.session_state.noise_multiplier = info.get("noise_multiplier")
     st.session_state.epochs = int(info.get("epochs", st.session_state.get("epochs", 5)))
-    st.session_state.batch_size = int(batch_size)
+    st.session_state.batch_size = 256
     set_stage("Adapter DP Fine-Tune", "done",
               f"final loss {info.get('final_loss', float('nan')):.4f}")
     set_stage("Synthetic Generation", "done", f"{len(synth_df):,} rows generated")
@@ -76,7 +76,7 @@ def _run_kaggle_route(session_dir: str, clean_cols, target_size: int):
 
     config = {
         "epsilon": float(st.session_state.get("target_epsilon", 1.0)),
-        "delta": st.session_state.get("delta_choice", "1.0e-4"),
+        "delta": float(st.session_state.get("delta_choice", "1.0e-4")),
         "epochs": int(st.session_state.get("epochs", 5)),
         "batch_size": int(st.session_state.get("batch_size", 256)),
         "clip_norm": float(st.session_state.get("clip_norm", 1.0)),
@@ -197,8 +197,8 @@ def _run_red_team_audit(session_dir: str, raw_df: pd.DataFrame, synth_df: pd.Dat
     st.session_state.mia_advantage = float(report.worst_success_rate)
     auc = None
     for r in report.results:
-        if r.get(attack) == dmia_auc:
-            auc = r.get(params, {}).get(auc)
+        if r.get("attack") == "dmia_auc":
+            auc = r.get("params", {}).get("auc")
             break
     if auc is not None:
         st.session_state.mia_attack_auc = float(auc)
@@ -253,47 +253,77 @@ def render_screen3():
             else:
                 st.markdown("<div style='color: #F87171; font-size: 0.9rem; margin-bottom: 8px;'>&#10007; Missing Kaggle credentials in Automation Settings.</div>", unsafe_allow_html=True)
             
-            st.checkbox("I understand the de-identified dataset will be uploaded to my private Kaggle dataset for GPU training.", key="kaggle_consent")
+        is_running = st.session_state.get("generation_in_progress", False)
+        
+        btn_col1, btn_col2 = st.columns([3, 1])
+        with btn_col1:
+            trigger_clicked = st.button("Trigger Full Generation & Sanitization", type="primary", width='stretch', disabled=is_running)
+        with btn_col2:
+            recover_clicked = st.button("Reconnect / Pull Job", disabled=is_running, help="Use this if you closed the tab while Kaggle was running")
             
-        if st.button("Trigger Full Generation & Sanitization", type="primary", width='stretch'):
-            raw_path = os.path.join(session_dir, "raw_upload.csv")
-            if not os.path.exists(raw_path):
-                st.error("No uploaded dataset found in this session.")
-                return
-            raw_df = pd.read_csv(raw_path)
-            dropped = st.session_state.get("hipaa_dropped", [])
-            clean_cols = [c for c in raw_df.columns if c not in dropped]
-            target_size = len(raw_df)
-
-            if route == "kaggle":
-                if not st.session_state.get("kaggle_consent", False):
-                    st.error("Consent required to start the Kaggle training job.")
+        if trigger_clicked or recover_clicked:
+            st.session_state.generation_in_progress = True
+            st.session_state._recovery_only = recover_clicked
+            st.rerun()
+            
+        if is_running:
+            try:
+                raw_path = os.path.join(session_dir, "raw_upload.csv")
+                if not os.path.exists(raw_path):
+                    st.error("No uploaded dataset found in this session.")
+                    st.session_state.generation_in_progress = False
                     return
-                got_raw, synth_df = _run_kaggle_route(session_dir, clean_cols, target_size)
-            else:
-                got_raw, synth_df = _run_adapter_route(session_dir, clean_cols, target_size)
-
-            if synth_df is not None and len(synth_df) > 0:
-                pass  # normal path — synth_df already loaded from route
-            else:
-                # Recovery path: UI may have disconnected mid-run but the CSV
-                # was already written to disk by a previous successful pull.
-                recovery_path = os.path.join(session_dir, "synthetic_clean.csv")
-                if os.path.exists(recovery_path):
-                    st.info("Recovered existing synthetic data from disk — running audit.")
-                    synth_df = pd.read_csv(recovery_path)
-                    if got_raw is None:
-                        got_raw = pd.read_csv(os.path.join(session_dir, "raw_upload.csv"))
-
-            if synth_df is not None and len(synth_df) > 0:
-                try:
-                    _run_red_team_audit(session_dir, got_raw, synth_df)
-                except Exception as e:
-                    set_stage("Red-Team Privacy Audit", "failed", str(e))
-                st.session_state.generation_complete = True
-                st.session_state.sanitization_complete = True
-                st.session_state.step = 4
-                st.rerun()
+                raw_df = pd.read_csv(raw_path)
+                dropped = st.session_state.get("hipaa_dropped", [])
+                clean_cols = [c for c in raw_df.columns if c not in dropped]
+                target_size = len(raw_df)
+                
+                got_raw, synth_df = None, None
+                
+                if st.session_state.get("_recovery_only", False):
+                    # Manual pull recovery - just skip push/poll and look for local file
+                    st.info("Checking local storage for Kaggle results...")
+                else:
+                    if route == "kaggle":
+                        if not st.session_state.get("kaggle_consent", False):
+                            st.error("Consent required to start the Kaggle training job. Please check Automation Settings in the sidebar.")
+                            st.session_state.generation_in_progress = False
+                            return
+                        got_raw, synth_df = _run_kaggle_route(session_dir, clean_cols, target_size)
+                    else:
+                        got_raw, synth_df = _run_adapter_route(session_dir, clean_cols, target_size)
+    
+                if synth_df is not None and len(synth_df) > 0:
+                    pass  # normal path — synth_df already loaded from route
+                else:
+                    # Recovery path
+                    recovery_path = os.path.join(session_dir, "synthetic_clean.csv")
+                    if os.path.exists(recovery_path):
+                        st.info("Recovered existing synthetic data from disk — running audit.")
+                        synth_df = pd.read_csv(recovery_path)
+                        if got_raw is None:
+                            got_raw = pd.read_csv(os.path.join(session_dir, "raw_upload.csv"))
+                    else:
+                        st.error("No synthetic_clean.csv found locally. Check Kaggle for job status.")
+                        st.session_state.generation_in_progress = False
+                        return
+    
+                if synth_df is not None and len(synth_df) > 0:
+                    try:
+                        _run_red_team_audit(session_dir, got_raw, synth_df)
+                    except Exception as e:
+                        set_stage("Red-Team Privacy Audit", "failed", str(e))
+                    st.session_state.generation_complete = True
+                    st.session_state.sanitization_complete = True
+                    st.session_state.generation_in_progress = False
+                    st.session_state.step = 4
+                    st.rerun()
+                else:
+                    st.session_state.generation_in_progress = False
+                    
+            except Exception as e:
+                st.session_state.generation_in_progress = False
+                st.error(f"Failed: {e}")
 
     with col2:
         st.markdown("### Post-Processing Execution Summary")

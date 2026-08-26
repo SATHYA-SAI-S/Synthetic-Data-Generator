@@ -23,10 +23,6 @@ def render_panel_c():
             Quantitative assessment of pairwise correlation preservation, marginal TVD, and downstream TSTR ML utility.
           </div>
         </div>
-        <div>
-          <span class="badge-pass">Bivariate RMSE: 0.1948</span>
-          <span class="badge-pass">TSTR Retention: 72.39%</span>
-        </div>
       </div>
     </div>
     """, unsafe_allow_html=True)
@@ -121,19 +117,24 @@ def render_panel_c():
         The gold-standard machine learning fidelity test: **train an XGBoost classifier exclusively on synthetic data, then evaluate its generalization performance on real, held-out clinical records**.
         """)
         
-        tstr_data = pd.DataFrame({
-            "Benchmark Condition": ["TRTR (Real Baseline)", f"TSTR (Synthetic Epsilon={active_eps})", "TSTR Retention Metric"],
-            "AUC-ROC Score": ["0.6855", "0.4962", "72.39% Retention"],
-            "Accuracy": ["88.91%", "88.84%", "99.92% Retained"],
-            "Clinical Task": ["Clinical Outcome Prediction", "Clinical Outcome Prediction", "Target > 60% PASS"]
-        })
-        st.dataframe(tstr_data, width='stretch')
+        metrics = get_parsed_evaluation_metrics()
+        tstr = metrics.get("tstr_metrics", {})
         
-        fig_tstr = go.Figure()
-        fig_tstr.add_trace(go.Bar(name='TRTR (Real)', x=['AUC-ROC Retention'], y=[100.0], marker_color='#1A73E8'))
-        fig_tstr.add_trace(go.Bar(name='TSTR (Synthetic)', x=['AUC-ROC Retention'], y=[72.39], marker_color='#22C55E'))
-        fig_tstr.update_layout(barmode='group', height=280, paper_bgcolor='rgba(0,0,0,0)', font={'color': "#F8FAFC"}, yaxis_title="Retention %")
-        st.plotly_chart(fig_tstr, width='stretch')
+        if tstr:
+            tstr_data = pd.DataFrame([
+                {"Benchmark Condition": "TRTR (Real Baseline)", "AUC-ROC Score": f"{tstr.get('trtr_auc', 0):.4f}", "Accuracy": f"{tstr.get('trtr_acc', 0):.2%}", "Clinical Task": "Binary Classification"},
+                {"Benchmark Condition": f"TSTR (Synthetic Epsilon={active_eps})", "AUC-ROC Score": f"{tstr.get('tstr_auc', 0):.4f}", "Accuracy": f"{tstr.get('tstr_acc', 0):.2%}", "Clinical Task": "Binary Classification"},
+                {"Benchmark Condition": "TSTR Retention Metric", "AUC-ROC Score": f"{tstr.get('auc_retention', 0):.2%}", "Accuracy": "-", "Clinical Task": "Target > 60% PASS"}
+            ])
+            st.dataframe(tstr_data, width='stretch')
+            
+            fig_tstr = go.Figure()
+            fig_tstr.add_trace(go.Bar(name='TRTR (Real)', x=['AUC-ROC Retention'], y=[100.0], marker_color='#1A73E8'))
+            fig_tstr.add_trace(go.Bar(name='TSTR (Synthetic)', x=['AUC-ROC Retention'], y=[tstr.get('auc_retention', 0) * 100], marker_color='#22C55E'))
+            fig_tstr.update_layout(barmode='group', height=280, paper_bgcolor='rgba(0,0,0,0)', font={'color': "#F8FAFC"}, yaxis_title="Retention %")
+            st.plotly_chart(fig_tstr, width='stretch')
+        else:
+            st.info("TSTR benchmark metrics not available for this run. Run the full evaluation pipeline to populate this tab.")
 
     # TAB 4: Integrity Audit
     with tab4:
@@ -142,21 +143,31 @@ def render_panel_c():
         n_synth_rows = len(synth_df) if synth_df is not None else 0
         n_synth_cols = len(synth_df.columns) if synth_df is not None else 0
         
+        unhandled_nans = st.session_state.get("unhandled_nans", 0)
+        domain_violations = st.session_state.get("domain_violations", 0)
+        
+        nan_status = "PASS" if unhandled_nans == 0 else "FAIL"
+        domain_status = "PASS" if domain_violations == 0 else "FAIL"
+        
         audit_items = [
-            ("NaN / Missingness Check", f"0 Unhandled NaNs detected across {n_synth_rows * n_synth_cols:,} generated cells", "PASS"),
-            ("Clinical Count Bounding", "All integer counts bounded to clinical range (non-negative)", "PASS"),
+            ("NaN / Missingness Check", f"{unhandled_nans:,} Unhandled NaNs detected across {n_synth_rows * n_synth_cols:,} generated cells", nan_status),
+            ("Clinical Count Bounding", f"{domain_violations} domain bound violations detected", domain_status),
             ("ID Column Integer Rounding", "Discrete IDs cast to integer codes (no decimal drift)", "PASS"),
             ("Categorical Diversity", "Synthesized categorical distributions preserved without mode collapse", "PASS"),
             ("Schema Structural Conformity", f"All {n_synth_cols} clean schema columns preserved with verified dtypes", "PASS")
         ]
         
         for name, desc, status in audit_items:
+            badge_class = "badge-pass" if status == "PASS" else "badge-fail"
+            # Using inline style for fail badge if not in css
+            badge_html = f'<span class="{badge_class}" style="background-color: {"#22C55E" if status=="PASS" else "#EF4444"}; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: bold;">{status}</span>'
+            
             st.markdown(f"""
             <div class="synth-card" style="padding: 12px 18px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
               <div>
                 <b style="color: #F8FAFC;">{name}</b>
                 <div style="color: #94A3B8; font-size: 0.8rem; margin-top: 2px;">{desc}</div>
               </div>
-              <div><span class="badge-pass">PASSED</span></div>
+              <div>{badge_html}</div>
             </div>
             """, unsafe_allow_html=True)

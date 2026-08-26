@@ -62,8 +62,17 @@ def run_adaptive_training(
     denoiser = MLPDenoiser(input_dim=dim, hidden_dims=[256, 256, 256],
                            num_timesteps=50).to(device)
 
+    from src.privacy.accountant import CentralPrivacyAccountant
+    
     noise_multiplier = max(1.0, 5.0 / max(float(epsilon), 0.1))
     optimizer = torch.optim.AdamW(denoiser.parameters(), lr=2e-4)
+    
+    sample_rate = float(batch_size) / float(n_rows)
+    accountant = CentralPrivacyAccountant(
+        sample_rate=sample_rate,
+        noise_multiplier=noise_multiplier,
+        target_delta=float(delta)
+    )
 
     ds = torch.from_numpy(X)
     loader = torch.utils.data.DataLoader(
@@ -106,7 +115,10 @@ def run_adaptive_training(
 
         avg = ep_loss / max(nb, 1)
         losses.append(avg)
-        eps_spent = float(epsilon) * ((ep + 1) / total_epochs)
+        
+        accountant.step(num_steps=nb)
+        eps_spent, _ = accountant.get_privacy_spent(target_delta=float(delta))
+        
         write_progress(stage="DP-SGD Training",
                        pct=5 + int(88 * (ep + 1) / total_epochs),
                        epoch=ep + 1, total_epochs=total_epochs, loss=avg,

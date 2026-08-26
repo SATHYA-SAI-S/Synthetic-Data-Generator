@@ -211,6 +211,12 @@ class KaggleBridge:
     def push_kernel(self, runner_script_path: str) -> None:
         """Generate kernel-metadata.json dynamically and push the kernel."""
         self._require_kaggle_cli()
+        
+        # Wait to ensure the dataset has finished processing on Kaggle's backend
+        # so that it mounts correctly in /kaggle/input/ when the kernel boots.
+        self.on_event("Packaging & Push", "Waiting 35s for dataset to process...")
+        time.sleep(35)
+        
         folder = Path(self.job.session_dir) / "kaggle_package"
         meta = {
             "id": self.job.slug_kernel,

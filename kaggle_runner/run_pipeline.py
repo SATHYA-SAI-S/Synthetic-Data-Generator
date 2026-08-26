@@ -95,14 +95,17 @@ def verify_cuda():
 def main():
     print("=== Starting Adaptive Kaggle DP-SGD Run ===")
 
-    # 0. Verify CUDA + copy the runner/trainer modules so imports resolve.
+    # 0. Install compatible PyTorch for P100 (sm_60) before verifying CUDA
+    print("Installing PyTorch with P100-compatible CUDA 11.8 build...")
+    subprocess.run(
+        "pip install --force-reinstall --no-cache-dir "
+        "torch==2.3.1 torchvision==0.18.1 "
+        "--index-url https://download.pytorch.org/whl/cu118 -q",
+        shell=True, check=False
+    )
+    
+    # 0b. Verify CUDA
     verify_cuda()
-
-    # Copy this runner + the training script into working dir so the kernel
-    # can import them (Kaggle mounts only the dataset, not the repo).
-    script_dir = Path(__file__).resolve().parent
-    for name in ("scripts", ""):
-        pass  # scaffold handled below by importing via PYTHONPATH
 
     ##########################################################################
     # 1. Locate user's data + config from the mounted private dataset
@@ -131,15 +134,12 @@ def main():
           f"samples={num_samples}")
 
     # 2. Ensure the training script + src package are importable from the repo.
-    #    On Kaggle we clone the pinned repo (deterministic) for the src package.
     _write_progress(stage="Preparing environment", pct=2, loss=0.0, epoch=0,
                     total_epochs=epochs)
     repo_dir = Path("/kaggle/working/Synthetic-Data-Generator")
-    pin = "29ca855cab13be9ef80c656f711697339c3ae165"  # workspace HEAD (deterministic)
     try:
         subprocess.run(
-            f'git clone https://github.com/SATHYA-SAI-S/Synthetic-Data-Generator.git '
-            f'"{repo_dir}" -q && cd "{repo_dir}" && git checkout {pin}',
+            f'git clone https://github.com/SATHYA-SAI-S/Synthetic-Data-Generator.git "{repo_dir}" -q',
             shell=True, check=True,
         )
     except subprocess.CalledProcessError:

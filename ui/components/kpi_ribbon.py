@@ -6,6 +6,9 @@ import streamlit as st
 
 def render_kpi_ribbon():
     """Render the high-visibility top KPI header bar (adaptive)."""
+    if not st.session_state.get("profile_complete"):
+        return
+        
     eps = st.session_state.get("epsilon_spent")
     mia = st.session_state.get("mia_advantage")
     tvd = st.session_state.get("tvd_best")

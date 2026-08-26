@@ -43,7 +43,10 @@ def render_screen1():
             if selected_session != "-- Select --" and selected_session != st.session_state.get("session_id"):
                 with open("sessions/last_session.txt", "w") as f:
                     f.write(selected_session)
+                creds = st.session_state.get("kaggle_credentials")
                 st.session_state.clear()
+                if creds:
+                    st.session_state.kaggle_credentials = creds
                 st.rerun()
                 
     # Prominent Upload Box (Centered Layout)

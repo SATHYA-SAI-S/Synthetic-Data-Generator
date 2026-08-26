@@ -72,37 +72,16 @@ def render_screen2():
         """, unsafe_allow_html=True)
         
     with col2:
-        st.markdown("### Live DP-SGD Telemetry &amp; Loss Curve")
-        
-        loss_history = pd.DataFrame({
-            "Epoch": [1, 2, 3, 4, 5],
-            "Diffusion MSE Loss": [1.2341, 1.1908, 1.1723, 1.1690, 1.1656],
-            "Cumulative Epsilon Spent": [0.0744, 0.1488, 0.2232, 0.2976, 0.3720]
-        })
-        
-        fig_loss = px.line(
-            loss_history, x="Epoch", y="Diffusion MSE Loss",
-            markers=True, title="Tabular Diffusion Training Loss Convergence"
-        )
-        fig_loss.update_layout(height=260, paper_bgcolor='rgba(0,0,0,0)', font={'color': "#F8FAFC"})
-        st.plotly_chart(fig_loss, width='stretch')
-        
+        st.markdown("### DP-SGD Training Configuration")
         st.markdown("""
-        <div class="synth-card">
-          <div style="display: flex; justify-content: space-between;">
-            <div>
-              <div class="kpi-title">Gradient Clipping Rate</div>
-              <div style="font-size: 1.2rem; font-weight: 700; color: #F8FAFC;">18.4% of batches</div>
-            </div>
-            <div>
-              <div class="kpi-title">Final Spent Epsilon</div>
-              <div style="font-size: 1.2rem; font-weight: 700; color: #4ADE80;">0.3720 / 1.0000</div>
-            </div>
-            <div>
-              <div class="kpi-title">Training Status</div>
-              <div><span class="badge-pass">CONVERGED</span></div>
-            </div>
+        <div class="synth-card" style="margin-top: 20px; padding: 24px; text-align: center;">
+          <div style="color: #94A3B8; font-size: 1.1rem; margin-bottom: 12px;">
+            Configuration Ready
           </div>
+          <p style="color: #64748B; font-size: 0.95rem;">
+            You have successfully configured the Differential Privacy hyperparameters.<br><br>
+            Click <strong>Proceed to Synthesis & Guardrails</strong> to execute the full training loop (either locally or on Kaggle). Telemetry and progress will be shown in the next step.
+          </p>
         </div>
         """, unsafe_allow_html=True)
         
