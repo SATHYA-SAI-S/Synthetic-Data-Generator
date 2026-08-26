@@ -5,7 +5,6 @@ import os
 import hashlib
 import streamlit as st
 import pandas as pd
-from ui.data_loaders.load_synthetic_csv import generate_synthetic_from_real
 from src.orchestration.route_decider import RouteDecider, RouteDecision, save_decision
 from ui.components.pipeline_checklist import (
     init_pipeline_stages, set_stage, render_pipeline_checklist,
@@ -122,12 +121,6 @@ def render_screen1():
                           f"{len(dropped)} direct identifiers stripped")
                 set_stage("Schema Profiling", "done", f"{len(clean_cols)} clean clinical columns")
                 set_stage("Route Decision", "done", f"{decision.route.upper()} route selected")
-                
-                # Pre-generate synthetic sample for the uploaded dataset
-                synth_df = generate_synthetic_from_real(df[clean_cols], epsilon=1.0)
-                synth_path = os.path.join(session_dir, "synthetic_clean.csv")
-                synth_df.to_csv(synth_path, index=False)
-                st.session_state.synthetic_data_path = synth_path
                 
                 st.toast(f"Successfully profiled {uploaded_file.name}: {len(df):,} records!")
             except Exception as e:
