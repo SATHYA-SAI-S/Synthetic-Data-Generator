@@ -143,8 +143,8 @@ def render_panel_c():
         n_synth_rows = len(synth_df) if synth_df is not None else 0
         n_synth_cols = len(synth_df.columns) if synth_df is not None else 0
         
-        unhandled_nans = st.session_state.get("unhandled_nans", 0)
-        domain_violations = st.session_state.get("domain_violations", 0)
+        unhandled_nans = st.session_state.get("unhandled_nans") or 0
+        domain_violations = st.session_state.get("domain_violations") or 0
         
         nan_status = "PASS" if unhandled_nans == 0 else "FAIL"
         domain_status = "PASS" if domain_violations == 0 else "FAIL"

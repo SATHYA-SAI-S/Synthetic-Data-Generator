@@ -345,15 +345,20 @@ def render_screen3():
                             return
     
                 if synth_df is not None and len(synth_df) > 0:
+                    audit_failed = False
                     try:
                         _run_red_team_audit(session_dir, got_raw, synth_df)
                     except Exception as e:
                         set_stage("Red-Team Privacy Audit", "failed", str(e))
-                    st.session_state.generation_complete = True
-                    st.session_state.sanitization_complete = True
+                        audit_failed = True
+                        st.error(f"Red-Team Audit Failed: {e}")
+                        
                     st.session_state.generation_in_progress = False
-                    st.session_state.step = 4
-                    st.rerun()
+                    if not audit_failed:
+                        st.session_state.generation_complete = True
+                        st.session_state.sanitization_complete = True
+                        st.session_state.step = 4
+                        st.rerun()
                 else:
                     st.session_state.generation_in_progress = False
                     
