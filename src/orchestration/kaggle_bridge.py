@@ -326,6 +326,16 @@ class KaggleBridge:
         """Download final artifacts into sessions/<id>/kaggle_results/."""
         results = Path(self.job.session_dir) / "kaggle_results"
         results.mkdir(parents=True, exist_ok=True)
+        
+        # Check if fetch_progress already downloaded it during the watch loop!
+        out_dir = Path(self.job.session_dir) / "kaggle_output"
+        fallback_csvs = list(out_dir.rglob("synthetic*.csv"))
+        if fallback_csvs:
+            import shutil
+            for f in fallback_csvs:
+                shutil.copy(f, results / f.name)
+            return results
+            
         try:
             proc = _run(f'kaggle kernels output {self.job.slug_kernel} -p "{results}" --quiet', timeout=90)
             ret_code = proc.returncode
