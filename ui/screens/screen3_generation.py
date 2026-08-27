@@ -261,111 +261,7 @@ def render_screen3():
         with btn_col2:
             recover_clicked = st.button("Reconnect / Pull Job", disabled=is_running, help="Use this if you closed the tab while Kaggle was running")
             
-        if trigger_clicked or recover_clicked:
-            st.session_state.generation_in_progress = True
-            st.session_state._recovery_only = recover_clicked
-            st.rerun()
             
-        if is_running:
-            try:
-                raw_path = os.path.join(session_dir, "raw_upload.csv")
-                if not os.path.exists(raw_path):
-                    st.error("No uploaded dataset found in this session.")
-                    st.session_state.generation_in_progress = False
-                    return
-                raw_df = pd.read_csv(raw_path)
-                dropped = st.session_state.get("hipaa_dropped", [])
-                clean_cols = [c for c in raw_df.columns if c not in dropped]
-                target_size = len(raw_df)
-                
-                got_raw, synth_df = None, None
-                
-                if st.session_state.get("_recovery_only", False):
-                    # Manual pull recovery - just skip push/poll and look for local file
-                    st.info("Checking local storage for Kaggle results...")
-                else:
-                    if route == "kaggle":
-                        if not st.session_state.get("kaggle_consent", False):
-                            st.error("Consent required to start the Kaggle training job. Please check Automation Settings in the sidebar.")
-                            st.session_state.generation_in_progress = False
-                            return
-                        got_raw, synth_df = _run_kaggle_route(session_dir, clean_cols, target_size)
-                    else:
-                        got_raw, synth_df = _run_adapter_route(session_dir, clean_cols, target_size)
-    
-                if synth_df is not None and len(synth_df) > 0:
-                    pass  # normal path — synth_df already loaded from route
-                else:
-                    # Recovery path
-                    recovery_path = os.path.join(session_dir, "synthetic_clean.csv")
-                    recovery_path = os.path.join(session_dir, "synthetic_clean.csv")
-                    if os.path.exists(recovery_path):
-                        st.info("Recovered existing synthetic data from disk — running audit.")
-                        synth_df = pd.read_csv(recovery_path)
-                        if got_raw is None:
-                            got_raw = pd.read_csv(os.path.join(session_dir, "raw_upload.csv"))
-                    else:
-                        st.info("Local CSV not found. Attempting to pull directly from Kaggle...")
-                        try:
-                            from src.orchestration.kaggle_bridge import KaggleBridge, KaggleJob
-                            creds = st.session_state.get("kaggle_credentials", {})
-                            # Reconstruct the job using the latest stamp from the dataset name or just a search
-                            import glob
-                            json_files = glob.glob(os.path.join(session_dir, "run_config*.json"))
-                            slug = None
-                            if json_files:
-                                with open(json_files[0], 'r') as f:
-                                    cfg = json.load(f)
-                                    slug = cfg.get("kaggle_slug_kernel")
-                            # Or we can just try to infer it. The kernel slug is in the bridge job if it was run recently.
-                            if not slug and 'last_kaggle_slug' in st.session_state:
-                                slug = st.session_state.last_kaggle_slug
-                            
-                            if slug:
-                                job = KaggleJob(session_dir=session_dir, slug_dataset="", slug_kernel=slug)
-                                bridge = KaggleBridge(job)
-                                results = bridge.pull_results()
-                                synth_candidate = os.path.join(results, "synthetic_clean.csv")
-                                if os.path.exists(synth_candidate):
-                                    shutil.copy2(synth_candidate, recovery_path)
-                                    synth_df = pd.read_csv(recovery_path)
-                                    if got_raw is None:
-                                        got_raw = pd.read_csv(os.path.join(session_dir, "raw_upload.csv"))
-                                else:
-                                    st.error("Pulled successfully, but no synthetic_clean.csv found in Kaggle outputs.")
-                                    st.session_state.generation_in_progress = False
-                                    return
-                            else:
-                                st.error("No synthetic_clean.csv found locally, and couldn't find Kaggle slug to pull from.")
-                                st.session_state.generation_in_progress = False
-                                return
-                        except Exception as e:
-                            st.error(f"Failed to recover from Kaggle: {e}")
-                            st.session_state.generation_in_progress = False
-                            return
-    
-                if synth_df is not None and len(synth_df) > 0:
-                    audit_failed = False
-                    try:
-                        _run_red_team_audit(session_dir, got_raw, synth_df)
-                    except Exception as e:
-                        set_stage("Red-Team Privacy Audit", "failed", str(e))
-                        audit_failed = True
-                        st.error(f"Red-Team Audit Failed: {e}")
-                        
-                    st.session_state.generation_in_progress = False
-                    if not audit_failed:
-                        st.session_state.generation_complete = True
-                        st.session_state.sanitization_complete = True
-                        st.session_state.step = 4
-                        st.rerun()
-                else:
-                    st.session_state.generation_in_progress = False
-                    
-            except Exception as e:
-                st.session_state.generation_in_progress = False
-                st.error(f"Failed: {e}")
-
     with col2:
         st.markdown("### Post-Processing Execution Summary")
         st.markdown(f"""
@@ -384,10 +280,119 @@ def render_screen3():
         """, unsafe_allow_html=True)
 
     st.markdown("---")
-    render_pipeline_checklist()
+    tracker_container = st.empty()
+    st.session_state["_tracker_container"] = tracker_container
+    with tracker_container:
+        render_pipeline_checklist()
     st.markdown("<br>", unsafe_allow_html=True)
     col_nav1, col_nav2 = st.columns([1, 4])
     with col_nav1:
         if st.button("Open OP Dashboard ->", type="primary", width='stretch'):
             st.session_state.step = 4
             st.rerun()
+    if trigger_clicked or recover_clicked:
+        st.session_state.generation_in_progress = True
+        st.session_state._recovery_only = recover_clicked
+        st.rerun()
+
+    # Execution Engine
+    if is_running:
+        try:
+            raw_path = os.path.join(session_dir, "raw_upload.csv")
+            if not os.path.exists(raw_path):
+                st.error("No uploaded dataset found in this session.")
+                st.session_state.generation_in_progress = False
+                return
+            raw_df = pd.read_csv(raw_path)
+            dropped = st.session_state.get("hipaa_dropped", [])
+            clean_cols = [c for c in raw_df.columns if c not in dropped]
+            target_size = len(raw_df)
+            
+            got_raw, synth_df = None, None
+            
+            if st.session_state.get("_recovery_only", False):
+                # Manual pull recovery - just skip push/poll and look for local file
+                st.info("Checking local storage for Kaggle results...")
+            else:
+                if route == "kaggle":
+                    if not st.session_state.get("kaggle_consent", False):
+                        st.error("Consent required to start the Kaggle training job. Please check Automation Settings in the sidebar.")
+                        st.session_state.generation_in_progress = False
+                        return
+                    got_raw, synth_df = _run_kaggle_route(session_dir, clean_cols, target_size)
+                else:
+                    got_raw, synth_df = _run_adapter_route(session_dir, clean_cols, target_size)
+    
+            if synth_df is not None and len(synth_df) > 0:
+                pass  # normal path — synth_df already loaded from route
+            else:
+                # Recovery path
+                recovery_path = os.path.join(session_dir, "synthetic_clean.csv")
+                recovery_path = os.path.join(session_dir, "synthetic_clean.csv")
+                if os.path.exists(recovery_path):
+                    st.info("Recovered existing synthetic data from disk — running audit.")
+                    synth_df = pd.read_csv(recovery_path)
+                    if got_raw is None:
+                        got_raw = pd.read_csv(os.path.join(session_dir, "raw_upload.csv"))
+                else:
+                    st.info("Local CSV not found. Attempting to pull directly from Kaggle...")
+                    try:
+                        from src.orchestration.kaggle_bridge import KaggleBridge, KaggleJob
+                        creds = st.session_state.get("kaggle_credentials", {})
+                        # Reconstruct the job using the latest stamp from the dataset name or just a search
+                        import glob
+                        json_files = glob.glob(os.path.join(session_dir, "run_config*.json"))
+                        slug = None
+                        if json_files:
+                            with open(json_files[0], 'r') as f:
+                                cfg = json.load(f)
+                                slug = cfg.get("kaggle_slug_kernel")
+                        # Or we can just try to infer it. The kernel slug is in the bridge job if it was run recently.
+                        if not slug and 'last_kaggle_slug' in st.session_state:
+                            slug = st.session_state.last_kaggle_slug
+                        
+                        if slug:
+                            job = KaggleJob(session_dir=session_dir, slug_dataset="", slug_kernel=slug)
+                            bridge = KaggleBridge(job)
+                            results = bridge.pull_results()
+                            synth_candidate = os.path.join(results, "synthetic_clean.csv")
+                            if os.path.exists(synth_candidate):
+                                shutil.copy2(synth_candidate, recovery_path)
+                                synth_df = pd.read_csv(recovery_path)
+                                if got_raw is None:
+                                    got_raw = pd.read_csv(os.path.join(session_dir, "raw_upload.csv"))
+                            else:
+                                st.error("Pulled successfully, but no synthetic_clean.csv found in Kaggle outputs.")
+                                st.session_state.generation_in_progress = False
+                                return
+                        else:
+                            st.error("No synthetic_clean.csv found locally, and couldn't find Kaggle slug to pull from.")
+                            st.session_state.generation_in_progress = False
+                            return
+                    except Exception as e:
+                        st.error(f"Failed to recover from Kaggle: {e}")
+                        st.session_state.generation_in_progress = False
+                        return
+    
+            if synth_df is not None and len(synth_df) > 0:
+                audit_failed = False
+                try:
+                    _run_red_team_audit(session_dir, got_raw, synth_df)
+                except Exception as e:
+                    set_stage("Red-Team Privacy Audit", "failed", str(e))
+                    audit_failed = True
+                    st.error(f"Red-Team Audit Failed: {e}")
+                    
+                st.session_state.generation_in_progress = False
+                if not audit_failed:
+                    st.session_state.generation_complete = True
+                    st.session_state.sanitization_complete = True
+                    st.session_state.step = 4
+                    st.rerun()
+            else:
+                st.session_state.generation_in_progress = False
+                
+        except Exception as e:
+            st.session_state.generation_in_progress = False
+            st.error(f"Failed: {e}")
+

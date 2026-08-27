@@ -50,19 +50,28 @@ def init_pipeline_stages(route: str = "kaggle") -> None:
 
 
 def set_stage(name: str, status: str, detail: str = "") -> None:
-    """Update one stage's status/detail by exact name."""
+    """Update one stage's status/detail by exact name and auto-update UI."""
     stages = st.session_state.get("pipeline_stages")
     if not stages:
         return
+    updated = False
     for s in stages:
         if s["name"] == name:
             s["status"] = status
             s["detail"] = detail
             s["ts"] = time.time() if status in ("done", "failed") else s["ts"]
-            return
-    # Unknown stage: append it so nothing is silently dropped.
-    stages.append({"name": name, "status": status, "detail": detail,
-                   "ts": time.time() if status in ("done", "failed") else None})
+            updated = True
+            break
+            
+    if not updated:
+        # Unknown stage: append it so nothing is silently dropped.
+        stages.append({"name": name, "status": status, "detail": detail,
+                       "ts": time.time() if status in ("done", "failed") else None})
+                       
+    container = st.session_state.get("_tracker_container")
+    if container is not None:
+        with container:
+            render_pipeline_checklist()
 
 
 def render_pipeline_checklist(title: str = "Pipeline Execution Tracker") -> None:
