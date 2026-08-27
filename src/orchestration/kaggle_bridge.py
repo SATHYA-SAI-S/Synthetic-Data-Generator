@@ -276,7 +276,11 @@ class KaggleBridge:
         """Pull latest output files and read progress.json written by the kernel."""
         out_dir = Path(self.job.session_dir) / "kaggle_output"
         out_dir.mkdir(parents=True, exist_ok=True)
-        _run(f'kaggle kernels output {self.job.slug_kernel} -p "{out_dir}" --quiet')
+        try:
+            _run(f'kaggle kernels output {self.job.slug_kernel} -p "{out_dir}" --quiet', timeout=30)
+        except subprocess.TimeoutExpired:
+            pass # Ignore fetch timeouts, just read the last downloaded progress.json if it exists
+            
         pj = out_dir / "progress.json"
         if pj.exists():
             try:
@@ -334,6 +338,16 @@ class KaggleBridge:
             # On Windows, the Kaggle CLI throws a charmap error while printing
             # progress but files are already downloaded. Check if CSVs landed.
             csv_found = any(results.rglob("synthetic*.csv"))
+            if not csv_found:
+                # Fallback: Check if fetch_progress already downloaded it to kaggle_output
+                out_dir = Path(self.job.session_dir) / "kaggle_output"
+                fallback_csvs = list(out_dir.rglob("synthetic*.csv"))
+                if fallback_csvs:
+                    import shutil
+                    for f in fallback_csvs:
+                        shutil.copy(f, results / f.name)
+                    csv_found = True
+                    
             if not csv_found:
                 err = classify_kaggle_error(out_err)
                 append_error_ledger(self.job.session_dir, err)

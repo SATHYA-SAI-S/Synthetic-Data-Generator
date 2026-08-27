@@ -18,7 +18,7 @@ def save_session():
         f.write(sid)
     dump = {}
     for k, v in st.session_state.items():
-        if isinstance(v, (str, int, float, bool, list, dict)) and k != "kaggle_credentials" and not k.endswith("_btn") and "step_btn" not in k and "FormSubmitter" not in k:
+        if isinstance(v, (str, int, float, bool, list, dict)) and not k.endswith("_btn") and "step_btn" not in k and "FormSubmitter" not in k:
             dump[k] = v
     with open(f"sessions/{sid}/state.json", "w") as f:
         json.dump(dump, f)
